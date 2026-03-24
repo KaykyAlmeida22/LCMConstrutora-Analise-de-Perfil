@@ -3,7 +3,7 @@ import type { DocumentType, ValidationResult } from '../types';
 // Simulated time-based validation rules (in days)
 const EXPIRY_RULES: Partial<Record<DocumentType, number>> = {
   comprovante_endereco: 60,
-  contracheque: 60,
+  contra_cheque: 60,
   extrato_bancario: 180,
 };
 
@@ -24,11 +24,11 @@ function simulateExtractedData(docType: DocumentType): Record<string, string> {
   };
 
   switch (docType) {
-    case 'rg':
+    case 'identidade_rg_cnh':
       return { ...baseData, rg: '12.345.678-9', data_nascimento: '15/03/1990' };
     case 'comprovante_endereco':
       return { ...baseData, endereco: 'Rua das Flores, 123 - Centro', cidade: 'São Paulo - SP' };
-    case 'contracheque':
+    case 'contra_cheque':
       return { ...baseData, salario_bruto: 'R$ 2.200,00', competencia: '02/2026' };
     case 'extrato_bancario':
       return { ...baseData, banco: 'Banco do Brasil', agencia: '1234', conta: '56789-0' };
@@ -74,7 +74,7 @@ export async function validateDocument(
 
   // Expiry check
   let expiryCheck: ValidationResult['expiryCheck'] = undefined;
-  const maxDays = EXPIRY_RULES[docType];
+  const maxDays = EXPIRY_RULES[docType as DocumentType];
   if (maxDays) {
     // Simulate: 20% chance document is expired
     const isExpired = Math.random() < 0.2;
@@ -93,7 +93,7 @@ export async function validateDocument(
   }
 
   // RG expired alert (non-blocking)
-  if (docType === 'rg' && Math.random() < 0.15) {
+  if (docType === 'identidade_rg_cnh' && Math.random() < 0.15) {
     issues.push('RG pode estar vencido. Verificação manual recomendada (não bloqueante).');
     // Not blocking: isValid stays true
   }
@@ -103,7 +103,7 @@ export async function validateDocument(
     confidence,
     isValid,
     issues,
-    extractedData: simulateExtractedData(docType),
+    extractedData: simulateExtractedData(docType as DocumentType),
     qualityScore,
     expiryCheck,
   };

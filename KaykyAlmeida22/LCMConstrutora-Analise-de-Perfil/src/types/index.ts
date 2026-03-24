@@ -49,7 +49,7 @@ export interface FormAnswers {
   
   // Bloco 4: Dependentes
   tem_dependentes?: boolean;
-  dependentes?: Dependent[]; // Utilizado para coletar na UI antes de salvar na tabela N:1
+  dependentes?: Dependent[]; 
 
   // Bloco 5: Financiamento
   tem_financiamento_habitacional?: boolean;
@@ -93,13 +93,13 @@ export interface FormAnswers {
 }
 
 export interface Candidate {
-  id: string; // uuid from Supabase
+  id: string; 
   nome_completo: string;
   cpf: string;
   telefone: string;
   endereco: string;
   municipio_projeto: string;
-  status: string; // 'documentacao_pendente', 'em_analise', 'aguardando_correcao', 'aprovado', 'subsidio_bloqueado', 'sem_renda_comprovavel'
+  status: string; 
   observacoes_analista?: string;
   narrativa_renda?: string;
   aprovado_em?: string;
@@ -107,7 +107,6 @@ export interface Candidate {
   created_at: string;
   updated_at: string;
 
-  // Joined properties / Virtual
   fichas_cadastrais?: FormAnswers;
   documentos?: Document[];
   dependentes?: Dependent[];
@@ -135,6 +134,7 @@ export interface FormStep {
   id: string;
   title: string;
   description: string;
+  questions: FormField[];
 }
 
 export type CandidateStatus = 
@@ -162,3 +162,42 @@ export const STATUS_COLORS: Record<CandidateStatus, string> = {
   subsidio_bloqueado: '#ef4444',
   sem_renda_comprovavel: '#991b1b',
 };
+
+export type DocumentType = 
+  | 'identidade_rg_cnh'
+  | 'cpf_separado'
+  | 'certidao_nascimento'
+  | 'certidao_casamento'
+  | 'certidao_casamento_divorcio'
+  | 'certidao_uniao_estavel'
+  | 'pacto_antenupcial'
+  | 'comprovante_endereco'
+  | 'comprovante_residencia_3anos'
+  | 'ctps_digital'
+  | 'contra_cheque'
+  | 'comprovante_imposto_pro_labore'
+  | 'declaracao_ir'
+  | 'extrato_bancario'
+  | 'fatura_cartao_credito'
+  | 'declaracao_aplicativo_uber_99_ifood'
+  | 'cnpj_mei'
+  | 'contrato_social_mei'
+  | 'das_mei'
+  | 'extrato_fgts'
+  | 'certidao_nascimento_dependente'
+  | 'comprovacao_responsabilidade_legal_dependente'
+  | 'outros';
+
+export interface ValidationResult {
+  documentId: string;
+  confidence: number;
+  isValid: boolean;
+  issues: string[];
+  extractedData: Record<string, string>;
+  qualityScore: number;
+  expiryCheck?: {
+    isExpired: boolean;
+    daysRemaining: number;
+    message: string;
+  };
+}

@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { db } from '../../services/mockDatabase';
+import { api } from '../../services/api';
 import { validateDocument } from '../../services/aiValidation';
-import { DOCUMENT_LABELS } from '../../types';
-import type { Candidate, DocumentType, CandidateDocument } from '../../types';
+import { getRequiredDocuments, getDocumentName } from '../../services/documentRules';
+import type { Candidate, DocumentType, Document } from '../../types';
 import ConfidenceMeter from '../../components/shared/ConfidenceMeter';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 
@@ -14,10 +14,9 @@ export default function Upload() {
 
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [loading, setLoading] = useState(true);
-  const [validatingDoc, setValidatingDoc] = useState<string | null>(null);
+  const [uploadingDocType, setUploadingDocType] = useState<DocumentType | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedDocType, setSelectedDocType] = useState<DocumentType | null>(null);
-  const [_dragOver, _setDragOver] = useState(false);
 
   useEffect(() => {
     loadCandidate();
@@ -26,7 +25,7 @@ export default function Upload() {
   async function loadCandidate() {
     if (!candidateId) return;
     setLoading(true);
-    const c = await db.getCandidate(candidateId);
+    const c = await api.getCandidate(candidateId);
     setCandidate(c || null);
     setLoading(false);
   }
@@ -47,46 +46,63 @@ export default function Upload() {
       return;
     }
 
-    // Check file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Arquivo muito grande. O tamanho máximo é 10MB.');
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Arquivo muito grande. O tamanho máximo é 5MB.');
       return;
     }
 
-    const docId = `doc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-    const fileUrl = URL.createObjectURL(file);
-
-    const newDoc: CandidateDocument = {
-      id: docId,
-      candidateId: candidate.id,
-      type: selectedDocType,
-      status: 'validando',
-      fileName: file.name,
-      fileUrl,
-      fileSize: file.size,
-      uploadedAt: new Date().toISOString(),
-    };
-
-    await db.addDocument(candidate.id, newDoc);
-    await loadCandidate();
-
-    // Run AI validation
-    setValidatingDoc(docId);
+    setUploadingDocType(selectedDocType);
+    
     try {
-      const result = await validateDocument(docId, selectedDocType, fileUrl);
-      await db.updateDocument(candidate.id, docId, {
-        status: result.isValid ? 'enviado' : 'rejeitado',
-        validation: result,
-      });
-    } catch {
-      await db.updateDocument(candidate.id, docId, { status: 'enviado' });
-    }
-    setValidatingDoc(null);
-    await loadCandidate();
+      // 1. Upload to Storage
+      const extension = file.name.split('.').pop() || 'pdf';
+      const storagePath = `${selectedDocType}_${Date.now()}.${extension}`;
+      const publicUrl = await api.uploadFile(candidate.id, file, storagePath);
 
-    // Reset
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    setSelectedDocType(null);
+      if (!publicUrl) {
+          throw new Error('Falha no upload do arquivo');
+      }
+
+      // 2. Create entry in Database
+      const newDoc: Partial<Document> = {
+        candidato_id: candidate.id,
+        tipo_documento: selectedDocType,
+        arquivo_url: publicUrl,
+        arquivo_original_nome: file.name,
+        formato_original: file.type,
+        status_upload: 'Enviado',
+        status_ia: 'Pendente',
+        aprovado_pelo_analista: false,
+      };
+
+      const createdDoc = await api.addDocument(newDoc);
+
+      if (createdDoc && createdDoc.id) {
+          // 3. Trigger IA Validation (Simulation)
+          // Em produção, isso seria um webhook ou edge function.
+          const iaResult = await validateDocument(createdDoc.id, selectedDocType, publicUrl);
+          
+          await api.updateDocument(createdDoc.id, {
+            status_ia: iaResult.isValid ? 'Aprovado' : 'Rejeitado',
+            confianca_leitura_ia: iaResult.confidence,
+            alertas_ia: {
+                issues: iaResult.issues,
+                qualityScore: iaResult.qualityScore,
+                expiryCheck: iaResult.expiryCheck
+            }
+          });
+      }
+      
+      await loadCandidate();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao enviar documento. Tente novamente.');
+    } finally {
+      setUploadingDocType(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      setSelectedDocType(null);
+    }
   }
 
   if (loading) return <LoadingSpinner size="lg" />;
@@ -102,9 +118,11 @@ export default function Upload() {
     );
   }
 
-  const uploadedTypes = candidate.documents.map((d) => d.type);
-  const missingDocs = candidate.requiredDocuments.filter((dt) => !uploadedTypes.includes(dt));
-  const sentDocs = candidate.documents;
+  const documentos = candidate.documentos || [];
+  const reqList = candidate.fichas_cadastrais ? getRequiredDocuments(candidate.fichas_cadastrais, candidate) : [];
+  
+  const uploadedTypes = documentos.map((d) => d.tipo_documento);
+  const missingDocs = reqList.filter((dt) => !uploadedTypes.includes(dt));
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '24px' }}>
@@ -142,7 +160,7 @@ export default function Upload() {
             Envio de Documentos
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            {candidate.nome} — CPF: {candidate.cpf}
+            {candidate.nome_completo} — CPF: {candidate.cpf}
           </p>
         </div>
 
@@ -153,7 +171,7 @@ export default function Upload() {
               📄 Progresso dos Documentos
             </span>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary-400)' }}>
-              {sentDocs.length}/{candidate.requiredDocuments.length}
+              {documentos.length}/{reqList.length}
             </span>
           </div>
           <div
@@ -167,7 +185,7 @@ export default function Upload() {
           >
             <div
               style={{
-                width: `${candidate.requiredDocuments.length > 0 ? (sentDocs.length / candidate.requiredDocuments.length) * 100 : 0}%`,
+                width: `${reqList.length > 0 ? (documentos.length / reqList.length) * 100 : 0}%`,
                 height: '100%',
                 background: 'linear-gradient(90deg, var(--primary-600), var(--success-500))',
                 borderRadius: '999px',
@@ -175,33 +193,26 @@ export default function Upload() {
               }}
             />
           </div>
-          {missingDocs.length > 0 && (
-            <div style={{ marginTop: '12px', fontSize: '0.82rem', color: 'var(--accent-400)' }}>
-              ⚠️ Faltam {missingDocs.length} documento(s) para completar o envio.
-            </div>
-          )}
         </div>
 
         {/* Photo Tips */}
         <div className="photo-tips" style={{ marginBottom: '24px' }}>
           <div className="photo-tips-title">📸 Dicas para uma boa foto do documento</div>
-          <ul className="photo-tips-list">
+          <ul className="photo-tips-list" style={{ fontSize: '0.85rem' }}>
             <li>Coloque o documento sobre uma superfície plana e escura</li>
             <li>Tire a foto com boa iluminação, sem sombras</li>
             <li>Enquadre todo o documento na tela, sem cortar bordas</li>
             <li>Evite reflexos e brilho (não use flash)</li>
-            <li>A foto deve estar nítida e legível</li>
-            <li>Formatos aceitos: PDF, JPEG ou PNG (máx. 10MB)</li>
           </ul>
         </div>
 
-        {/* Missing documents to upload */}
+        {/* Pending documents to upload */}
         {missingDocs.length > 0 && (
           <div style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
               📋 Documentos Pendentes
             </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
               {missingDocs.map((docType) => (
                 <div
                   key={docType}
@@ -211,21 +222,21 @@ export default function Upload() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '16px 20px',
-                    cursor: 'pointer',
+                    cursor: uploadingDocType ? 'not-allowed' : 'pointer',
+                    opacity: uploadingDocType ? 0.7 : 1
                   }}
-                  onClick={() => handleUploadClick(docType)}
+                  onClick={() => !uploadingDocType && handleUploadClick(docType)}
                 >
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                      {DOCUMENT_LABELS[docType]}
-                    </div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      Clique para enviar
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>
+                      {getDocumentName(docType)}
                     </div>
                   </div>
-                  <button className="btn btn-primary btn-sm">
-                    📤 Enviar
-                  </button>
+                  {uploadingDocType === docType ? (
+                      <div className="spinner" style={{ width: 20, height: 20 }} />
+                  ) : (
+                      <button className="btn btn-primary btn-sm">📤</button>
+                  )}
                 </div>
               ))}
             </div>
@@ -233,89 +244,62 @@ export default function Upload() {
         )}
 
         {/* Sent documents */}
-        {sentDocs.length > 0 && (
+        {documentos.length > 0 && (
           <div style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
               ✅ Documentos Enviados
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {sentDocs.map((doc) => (
+              {documentos.map((doc) => (
                 <div
                   key={doc.id}
                   className="card"
                   style={{
                     borderLeftWidth: '3px',
                     borderLeftColor:
-                      doc.status === 'aprovado' ? 'var(--success-500)' :
-                      doc.status === 'rejeitado' ? 'var(--danger-500)' :
-                      doc.status === 'validando' ? 'var(--accent-500)' :
+                      doc.status_upload === 'Aprovado' ? 'var(--success-500)' :
+                      doc.status_upload === 'Rejeitado' ? 'var(--danger-500)' :
                       'var(--primary-500)',
                   }}
                 >
                   <div className="flex items-center justify-between" style={{ marginBottom: '8px' }}>
                     <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                      {DOCUMENT_LABELS[doc.type]}
+                      {getDocumentName(doc.tipo_documento as DocumentType)}
                     </div>
                     <span
                       style={{
                         fontSize: '0.78rem',
                         fontWeight: 600,
                         color:
-                          doc.status === 'aprovado' ? 'var(--success-500)' :
-                          doc.status === 'rejeitado' ? 'var(--danger-500)' :
-                          doc.status === 'validando' ? 'var(--accent-500)' :
+                          doc.status_upload === 'Aprovado' ? 'var(--success-500)' :
+                          doc.status_upload === 'Rejeitado' ? 'var(--danger-500)' :
                           'var(--primary-400)',
                       }}
                     >
-                      {doc.status === 'validando' && '⏳ Validando...'}
-                      {doc.status === 'enviado' && '📤 Enviado'}
-                      {doc.status === 'aprovado' && '✅ Aprovado'}
-                      {doc.status === 'rejeitado' && '❌ Rejeitado — Reenvie'}
+                      {doc.status_upload === 'Enviado' && '📤 Enviado'}
+                      {doc.status_upload === 'Aprovado' && '✅ Aprovado'}
+                      {doc.status_upload === 'Rejeitado' && '❌ Rejeitado — Reenvie'}
                     </span>
                   </div>
 
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                    📎 {doc.fileName} • {(doc.fileSize / 1024).toFixed(0)} KB
+                    📎 {doc.arquivo_original_nome || 'Arquivo'} 
                   </div>
 
-                  {validatingDoc === doc.id && (
-                    <div className="flex items-center gap-2" style={{ marginTop: '12px' }}>
-                      <div className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
-                      <span style={{ fontSize: '0.82rem', color: 'var(--accent-500)' }}>
-                        Analisando documento com IA...
-                      </span>
-                    </div>
-                  )}
-
-                  {doc.validation && (
+                  {doc.status_ia !== 'Pendente' && (
                     <div style={{ marginTop: '12px' }}>
                       <div style={{ marginBottom: '8px' }}>
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                          Confiança da análise:
+                          IA (Confiança):
                         </span>
-                        <ConfidenceMeter value={doc.validation.confidence} size="sm" />
+                        <ConfidenceMeter value={doc.confianca_leitura_ia || 0} size="sm" />
                       </div>
-
-                      {doc.validation.issues.length > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          {doc.validation.issues.map((issue, i) => (
-                            <div
-                              key={i}
-                              className="alert alert-warning"
-                              style={{ padding: '8px 12px', fontSize: '0.78rem' }}
-                            >
-                              <span className="alert-icon" style={{ fontSize: '0.85rem' }}>⚠️</span>
-                              <span>{issue}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {doc.status === 'rejeitado' && (
+                      
+                      {doc.status_upload === 'Rejeitado' && (
                         <button
                           className="btn btn-outline btn-sm"
-                          style={{ marginTop: '12px' }}
-                          onClick={() => handleUploadClick(doc.type)}
+                          style={{ marginTop: '8px' }}
+                          onClick={() => handleUploadClick(doc.tipo_documento as DocumentType)}
                         >
                           🔄 Reenviar documento
                         </button>
@@ -329,14 +313,14 @@ export default function Upload() {
         )}
 
         {/* All done */}
-        {missingDocs.length === 0 && sentDocs.length > 0 && (
+        {missingDocs.length === 0 && documentos.length > 0 && (
           <div className="card" style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.06)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎉</div>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '4px' }}>
               Todos os documentos foram enviados!
             </h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>
-              Agora é só aguardar a análise da equipe LCM Construtora. Entraremos em contato em breve.
+              Agora é só aguardar a análise da equipe LCM Construtora.
             </p>
             <button className="btn btn-primary" onClick={() => navigate('/')}>
               Voltar ao Início

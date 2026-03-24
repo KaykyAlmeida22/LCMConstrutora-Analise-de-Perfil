@@ -22,6 +22,25 @@ export const api = {
     return data as Candidate[];
   },
 
+  async uploadFile(candidateId: string, file: File, path: string): Promise<string | null> {
+    const { data, error } = await supabase.storage
+      .from('documentos_candidatos')
+      .upload(`${candidateId}/${path}`, file, {
+        upsert: true
+      });
+
+    if (error) {
+      console.error('Error uploading file:', error);
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('documentos_candidatos')
+      .getPublicUrl(data.path);
+
+    return publicUrl;
+  },
+
   async getCandidate(id: string): Promise<Candidate | undefined> {
     const { data, error } = await supabase
       .from('candidatos')

@@ -1,32 +1,46 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db } from '../../services/mockDatabase';
-import {
-  DOCUMENT_LABELS,
-} from '../../types';
-import type {
-  Candidate,
-  CandidateStatus,
-  DocumentType,
-  CandidateDocument,
-} from '../../types';
+import { api } from '../../services/api';
+import { getRequiredDocuments, getDocumentName } from '../../services/documentRules';
+import type { Candidate, CandidateStatus, DocumentType, Document } from '../../types';
 import StatusBadge from '../../components/shared/StatusBadge';
 import ConfidenceMeter from '../../components/shared/ConfidenceMeter';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 
 const FORM_ANSWER_LABELS: Record<string, string> = {
-  estadoCivil: 'Estado Civil',
-  temDependentes: 'Possui Dependentes',
-  quantosDependentes: 'Quantidade de Dependentes',
-  dependenteComRenda: 'Dependente com Renda',
-  possuiImovel: 'Possui Imóvel',
-  tipoMoradia: 'Tipo de Moradia',
-  tipoRenda: 'Tipo de Renda',
-  faixaRenda: 'Faixa de Renda',
-  recebeuBeneficioHabitacional: 'Recebeu Benefício Habitacional',
-  dataBeneficio: 'Data do Benefício',
-  recebeBolsaFamilia: 'Recebe Bolsa Família',
-  possuiFGTS: 'Possui FGTS',
+  tipo_residencia: 'Tipo de Residência',
+  valor_aluguel: 'Valor do Aluguel',
+  teve_imovel_anterior: 'Imóvel Anterior',
+  venda_registrada_cartorio: 'Venda Registrada',
+  escolaridade: 'Escolaridade',
+  estado_civil: 'Estado Civil',
+  regime_bens: 'Regime de Bens',
+  data_casamento: 'Data Casamento',
+  tem_dependentes: 'Possui Dependentes',
+  tem_financiamento_habitacional: 'Financ. Habitacional',
+  data_contrato_habitacional: 'Data Contrato financ.',
+  financiamento_habitacional_pos_2005: 'Financ. Hab. Pós 2005 (Bloqueante)',
+  tem_financiamento_estudantil: 'Financ. Estudantil',
+  financiamento_estudantil_em_atraso: 'Financ. Estudantil em Atraso',
+  tem_veiculo: 'Possui Veículo',
+  valor_mercado_veiculo: 'Valor Mercado Veíc.',
+  veiculo_financiado: 'Veículo Financiado',
+  prestacao_veiculo: 'Prestação Veí.',
+  parcelas_restantes_veiculo: 'Parcelas Restantes veíc.',
+  tem_cartao_credito: 'Cartão Crédito',
+  bandeira_cartao: 'Bandeira Cartão',
+  tem_imovel: 'Possui Imóvel Atual',
+  valor_mercado_imovel: 'Valor Imóvel',
+  declara_ir: 'Declara IR',
+  tem_conta_corrente: 'Conta Corrente',
+  banco_conta_corrente: 'Banco',
+  limite_cheque_especial: 'Cheque Especial',
+  tem_poupanca_aplicacao: 'Poupança / Aplicação',
+  comprova_36_meses_fgts: 'Comprova 36 Meses FGTS',
+  fara_uso_fgts: 'Uso de FGTS',
+  tipo_renda: 'Tipo Renda',
+  faixa_renda: 'Faixa Renda',
+  trabalha_aplicativo: 'Trabalho de App'
 };
 
 function formatValue(value: unknown): string {
@@ -52,10 +66,10 @@ export default function CandidateDetail() {
   async function loadCandidate() {
     if (!id) return;
     setLoading(true);
-    const c = await db.getCandidate(id);
+    const c = await api.getCandidate(id);
     if (c) {
       setCandidate(c);
-      setObservations(c.analystObservations);
+      setObservations(c.observacoes_analista || '');
     }
     setLoading(false);
   }
@@ -63,24 +77,29 @@ export default function CandidateDetail() {
   async function handleStatusChange(newStatus: CandidateStatus) {
     if (!candidate) return;
     setSaving(true);
-    await db.updateCandidate(candidate.id, {
+    await api.updateCandidate(candidate.id, {
       status: newStatus,
-      analystObservations: observations,
+      observacoes_analista: observations,
     });
+    // Log history
+    await api.updateStatus(candidate.id, newStatus, undefined, 'Status alterado manualmente pelo analista');
     await loadCandidate();
     setSaving(false);
   }
 
-  async function handleDocAction(doc: CandidateDocument, action: 'aprovado' | 'rejeitado') {
-    if (!candidate) return;
-    await db.updateDocument(candidate.id, doc.id, { status: action });
+  async function handleDocAction(doc: Document, action: 'Aprovado' | 'Rejeitado') {
+    if (!candidate || !doc.id) return;
+    await api.updateDocument(doc.id, { 
+      status_upload: action,
+      aprovado_pelo_analista: action === 'Aprovado'
+    });
     await loadCandidate();
   }
 
   async function handleSaveObservations() {
     if (!candidate) return;
     setSaving(true);
-    await db.updateCandidate(candidate.id, { analystObservations: observations });
+    await api.updateCandidate(candidate.id, { observacoes_analista: observations });
     setSaving(false);
   }
 
@@ -97,12 +116,15 @@ export default function CandidateDetail() {
     );
   }
 
-  const docsUploaded = candidate.documents.length;
-  const docsRequired = candidate.requiredDocuments.length;
-  const docsApproved = candidate.documents.filter((d) => d.status === 'aprovado').length;
-  const docsRejected = candidate.documents.filter((d) => d.status === 'rejeitado').length;
-  const docsMissing = candidate.requiredDocuments.filter(
-    (dt) => !candidate.documents.find((d) => d.type === dt)
+  const documentos = candidate.documentos || [];
+  const reqList = candidate.fichas_cadastrais ? getRequiredDocuments(candidate.fichas_cadastrais, candidate) : [];
+  
+  const docsUploaded = documentos.length;
+  const docsRequired = reqList.length;
+  const docsApproved = documentos.filter((d) => d.status_upload === 'Aprovado').length;
+  const docsRejected = documentos.filter((d) => d.status_upload === 'Rejeitado').length;
+  const docsMissing = reqList.filter(
+    (dt) => !documentos.find((d) => d.tipo_documento === dt)
   );
 
   return (
@@ -111,10 +133,10 @@ export default function CandidateDetail() {
       <div style={{ marginBottom: '24px' }}>
         <button
           className="btn btn-ghost btn-sm"
-          onClick={() => navigate('/admin')}
+          onClick={() => navigate('/admin/candidatos')}
           style={{ marginBottom: '16px' }}
         >
-          ← Voltar ao Painel
+          ← Voltar aos Candidatos
         </button>
 
         <div className="flex items-center justify-between" style={{ flexWrap: 'wrap', gap: '16px' }}>
@@ -133,17 +155,17 @@ export default function CandidateDetail() {
                 color: 'white',
               }}
             >
-              {candidate.nome.charAt(0)}
+              {candidate.nome_completo.charAt(0).toUpperCase()}
             </div>
             <div>
               <h1 style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.2 }}>
-                {candidate.nome}
+                {candidate.nome_completo}
               </h1>
               <div className="flex items-center gap-3" style={{ marginTop: '4px' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
                   CPF: {candidate.cpf}
                 </span>
-                <StatusBadge status={candidate.status} />
+                <StatusBadge status={candidate.status as CandidateStatus} />
               </div>
             </div>
           </div>
@@ -154,14 +176,14 @@ export default function CandidateDetail() {
               onClick={() => handleStatusChange('aprovado')}
               disabled={saving}
             >
-              ✅ Aprovar
+              ✅ Aprovar Final
             </button>
             <button
               className="btn btn-danger"
               onClick={() => handleStatusChange('sem_renda_comprovavel')}
               disabled={saving}
             >
-              ❌ Reprovar
+              ❌ Reprovar (Sem Renda)
             </button>
             <button
               className="btn btn-outline"
@@ -187,21 +209,21 @@ export default function CandidateDetail() {
           <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--success-500)' }}>✅</div>
           <div>
             <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsApproved}</div>
-            <div className="stat-label">Aprovados</div>
+            <div className="stat-label">Doc. Aprovados</div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--danger-500)' }}>❌</div>
           <div>
             <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsRejected}</div>
-            <div className="stat-label">Rejeitados</div>
+            <div className="stat-label">Doc. Rejeitados</div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--accent-500)' }}>📋</div>
           <div>
             <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsMissing.length}</div>
-            <div className="stat-label">Faltantes</div>
+            <div className="stat-label">Doc. Faltantes</div>
           </div>
         </div>
       </div>
@@ -228,7 +250,7 @@ export default function CandidateDetail() {
             <div className="detail-grid">
               <div className="detail-item">
                 <span className="detail-label">Nome Completo</span>
-                <span className="detail-value">{candidate.nome}</span>
+                <span className="detail-value">{candidate.nome_completo}</span>
               </div>
               <div className="detail-item">
                 <span className="detail-label">CPF</span>
@@ -239,27 +261,23 @@ export default function CandidateDetail() {
                 <span className="detail-value">{candidate.telefone || '—'}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Email</span>
-                <span className="detail-value">{candidate.email || '—'}</span>
+                <span className="detail-label">Endereço (MCMV)</span>
+                <span className="detail-value">{candidate.endereco || '—'}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Data de Nascimento</span>
-                <span className="detail-value">
-                  {candidate.dataNascimento
-                    ? new Date(candidate.dataNascimento + 'T12:00:00').toLocaleDateString('pt-BR')
-                    : '—'}
-                </span>
+                <span className="detail-label">Município Projeto</span>
+                <span className="detail-value">{candidate.municipio_projeto || '—'}</span>
               </div>
             </div>
           </div>
 
           {/* Form Answers */}
-          {candidate.formAnswers ? (
+          {candidate.fichas_cadastrais ? (
             <div className="detail-section">
               <h3 className="detail-section-title">📝 Respostas da Ficha Pré-Cadastral</h3>
               <div className="detail-grid">
-                {Object.entries(candidate.formAnswers)
-                  .filter(([key]) => key !== 'narrativaAtividade')
+                {Object.entries(candidate.fichas_cadastrais)
+                  .filter(([key]) => key !== 'candidato_id')
                   .map(([key, value]) => (
                     <div className="detail-item" key={key}>
                       <span className="detail-label">{FORM_ANSWER_LABELS[key] || key}</span>
@@ -268,32 +286,44 @@ export default function CandidateDetail() {
                   ))}
               </div>
 
+              {/* Dependentes se houver */}
+              {candidate.dependentes && candidate.dependentes.length > 0 && (
+                 <div style={{ marginTop: '16px' }}>
+                   <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Dependentes</div>
+                   <div className="detail-grid">
+                      {candidate.dependentes.map(dep => (
+                         <div key={dep.id} className="card" style={{ padding: '8px 12px' }}>
+                           <div><strong>{dep.nome}</strong> ({dep.idade} anos)</div>
+                           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Grau: {dep.grau_parentesco}</div>
+                           {dep.tem_renda && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Renda: R$ {dep.valor_renda}</div>}
+                         </div>
+                      ))}
+                   </div>
+                 </div>
+              )}
+
               {/* Alerts */}
-              {candidate.formAnswers.possuiImovel && (
+              {candidate.fichas_cadastrais.tem_imovel && (
                 <div className="alert alert-warning" style={{ marginTop: '16px' }}>
                   <span className="alert-icon">⚠️</span>
                   <div>
-                    <strong>Atenção:</strong> Candidato declarou possuir imóvel. Isso pode inviabilizar o acesso ao programa.
+                    <strong>Atenção:</strong> Candidato declarou possuir imóvel em seu nome neste instante.
                   </div>
                 </div>
               )}
-              {candidate.formAnswers.recebeuBeneficioHabitacional && candidate.formAnswers.dataBeneficio && (
+              {candidate.fichas_cadastrais.financiamento_habitacional_pos_2005 && (
                 <div className="alert alert-error" style={{ marginTop: '16px' }}>
                   <span className="alert-icon">🚫</span>
                   <div>
-                    <strong>Subsídio Bloqueado:</strong> Candidato recebeu benefício habitacional em{' '}
-                    {new Date(candidate.formAnswers.dataBeneficio + 'T12:00:00').toLocaleDateString('pt-BR')}.
-                    {new Date(candidate.formAnswers.dataBeneficio) > new Date('2005-05-16')
-                      ? ' Após 16/05/2005 — subsídio bloqueado.'
-                      : ' Antes de 16/05/2005 — elegível.'}
+                    <strong>Subsídio Bloqueado:</strong> Candidato recebeu benefício habitacional após 16/05/2005. Processo pode continuar sem subsídio.
                   </div>
                 </div>
               )}
-              {candidate.formAnswers.tipoRenda === 'sem_renda' && (
+              {candidate.fichas_cadastrais.tipo_renda === 'Sem_renda' && (
                 <div className="alert alert-error" style={{ marginTop: '16px' }}>
                   <span className="alert-icon">💰</span>
                   <div>
-                    <strong>Sem Renda Comprovável:</strong> Candidato declarou não possuir renda. Este é o ÚNICO motivo de reprovação definitiva.
+                    <strong>Sem Renda Comprovável:</strong> Candidato declarou não possuir renda alguma. (Avaliar reprovação)
                   </div>
                 </div>
               )}
@@ -309,7 +339,7 @@ export default function CandidateDetail() {
                   }}
                 >
                   <p style={{ fontSize: '0.9rem', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                    {candidate.formAnswers.narrativaAtividade || '(Nenhuma narrativa fornecida)'}
+                    {candidate.narrativa_renda || '(Nenhuma narrativa fornecida)'}
                   </p>
                 </div>
               </div>
@@ -353,22 +383,21 @@ export default function CandidateDetail() {
               <span className="alert-icon">📋</span>
               <div>
                 <strong>Documentos faltantes ({docsMissing.length}):</strong>{' '}
-                {docsMissing.map((dt) => DOCUMENT_LABELS[dt]).join(', ')}
+                {docsMissing.map((dt) => getDocumentName(dt)).join(', ')}
               </div>
             </div>
           )}
 
           {/* Document grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '16px' }}>
-            {candidate.requiredDocuments.map((docType: DocumentType) => {
-              const doc = candidate.documents.find((d) => d.type === docType);
+            {reqList.map((docType) => {
+              const doc = documentos.find((d) => d.tipo_documento === docType);
               const statusColorMap: Record<string, string> = {
-                pendente: 'var(--text-muted)',
-                enviado: 'var(--primary-400)',
-                validando: 'var(--accent-500)',
-                aprovado: 'var(--success-500)',
-                rejeitado: 'var(--danger-500)',
-                alerta: 'var(--accent-400)',
+                Pendente: 'var(--text-muted)',
+                Enviado: 'var(--primary-400)',
+                Processando: 'var(--accent-500)',
+                Aprovado: 'var(--success-500)',
+                Rejeitado: 'var(--danger-500)',
               };
 
               return (
@@ -377,22 +406,20 @@ export default function CandidateDetail() {
                   className="doc-card"
                   style={{
                     borderLeftWidth: '3px',
-                    borderLeftColor: doc ? statusColorMap[doc.status] : 'var(--border-default)',
+                    borderLeftColor: doc ? statusColorMap[doc.status_upload] : 'var(--border-default)',
                   }}
                 >
                   <div className="doc-card-header">
-                    <span className="doc-card-title">{DOCUMENT_LABELS[docType]}</span>
+                    <span className="doc-card-title">{getDocumentName(docType)}</span>
                     {doc ? (
                       <span
                         className="doc-card-status"
-                        style={{ color: statusColorMap[doc.status], fontWeight: 600 }}
+                        style={{ color: statusColorMap[doc.status_upload], fontWeight: 600 }}
                       >
-                        {doc.status === 'aprovado' && '✅ Aprovado'}
-                        {doc.status === 'rejeitado' && '❌ Rejeitado'}
-                        {doc.status === 'enviado' && '📤 Enviado'}
-                        {doc.status === 'validando' && '⏳ Validando'}
-                        {doc.status === 'alerta' && '⚠️ Alerta'}
-                        {doc.status === 'pendente' && '⏸ Pendente'}
+                        {doc.status_upload === 'Aprovado' && '✅ Aprovado'}
+                        {doc.status_upload === 'Rejeitado' && '❌ Rejeitado'}
+                        {doc.status_upload === 'Enviado' && '📤 Enviado'}
+                        {doc.status_upload === 'Pendente' && '⏸ Pendente'}
                       </span>
                     ) : (
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -404,58 +431,47 @@ export default function CandidateDetail() {
                   {doc ? (
                     <div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                        📎 {doc.fileName} • {(doc.fileSize / 1024).toFixed(0)} KB
+                        📎 {doc.arquivo_original_nome || 'Arquivo'} 
                       </div>
 
-                      {doc.validation && (
+                      {doc.status_ia !== 'Pendente' && (
                         <div style={{ marginBottom: '12px' }}>
                           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                            Confiança da IA
+                            Confiança Lida (IA)
                           </div>
-                          <ConfidenceMeter value={doc.validation.confidence} />
-
-                          {doc.validation.issues.length > 0 && (
-                            <div style={{ marginTop: '8px' }}>
-                              {doc.validation.issues.map((issue, i) => (
-                                <div
-                                  key={i}
-                                  style={{
-                                    fontSize: '0.78rem',
-                                    color: doc.validation!.isValid ? 'var(--accent-400)' : 'var(--danger-500)',
-                                    display: 'flex',
-                                    gap: '6px',
-                                    marginTop: '4px',
-                                  }}
-                                >
-                                  <span>{doc.validation!.isValid ? '⚠️' : '❌'}</span>
-                                  <span>{issue}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          <ConfidenceMeter value={doc.confianca_leitura_ia || 0} />
+                          <div style={{ marginTop: '8px', fontSize: '0.75rem' }}>
+                            Status IA: {doc.status_ia}
+                          </div>
                         </div>
                       )}
 
                       <div className="flex gap-2" style={{ marginTop: '8px' }}>
                         <button
-                          className="btn btn-success btn-sm"
-                          onClick={() => handleDocAction(doc, 'aprovado')}
-                          disabled={doc.status === 'aprovado'}
+                          className="btn btn-outline btn-sm"
+                          onClick={() => window.open(doc.arquivo_url, '_blank')}
                         >
-                          ✅ Aprovar
+                          👁️ Ver
+                        </button>
+                        <button
+                          className="btn btn-success btn-sm"
+                          onClick={() => handleDocAction(doc, 'Aprovado')}
+                          disabled={doc.status_upload === 'Aprovado'}
+                        >
+                          ✅ 
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
-                          onClick={() => handleDocAction(doc, 'rejeitado')}
-                          disabled={doc.status === 'rejeitado'}
+                          onClick={() => handleDocAction(doc, 'Rejeitado')}
+                          disabled={doc.status_upload === 'Rejeitado'}
                         >
-                          ❌ Rejeitar
+                          ❌ 
                         </button>
                       </div>
                     </div>
                   ) : (
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                      Aguardando envio pelo candidato.
+                      Aguardando envio.
                     </div>
                   )}
                 </div>
@@ -470,34 +486,26 @@ export default function CandidateDetail() {
           <div className="alert alert-info" style={{ marginBottom: '20px' }}>
             <span className="alert-icon">🤖</span>
             <div>
-              A validação por IA analisa automaticamente a qualidade da imagem, extrai dados via OCR e verifica prazos de validade.
-              <br />
-              <strong>Nível de confiança:</strong> acima de 90% = alta confiança, 75-90% = média, abaixo de 75% = requer revisão manual.
+              A validação por IA analisa automaticamente a qualidade, extrai dados via OCR e verifica prazos de validade.
             </div>
           </div>
 
-          {candidate.documents.filter((d) => d.validation).length === 0 ? (
+          {documentos.filter((d) => d.status_ia && d.status_ia !== 'Pendente').length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-icon">🤖</div>
-              <div className="empty-state-title">Nenhuma validação disponível</div>
-              <div className="empty-state-text">
-                As validações aparecem aqui após o candidato enviar os documentos.
-              </div>
+              <div className="empty-state-title">Nenhuma validação de IA concluída</div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {candidate.documents
-                .filter((d) => d.validation)
+              {documentos
+                .filter((d) => d.status_ia !== 'Pendente')
                 .map((doc) => (
                   <div key={doc.id} className="card">
                     <div className="flex items-center justify-between" style={{ marginBottom: '16px' }}>
                       <div>
                         <h4 style={{ fontWeight: 600, fontSize: '0.95rem' }}>
-                          {DOCUMENT_LABELS[doc.type]}
+                          {getDocumentName(doc.tipo_documento as DocumentType)}
                         </h4>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                          {doc.fileName}
-                        </span>
                       </div>
                       <div
                         style={{
@@ -505,70 +513,33 @@ export default function CandidateDetail() {
                           borderRadius: '999px',
                           fontSize: '0.78rem',
                           fontWeight: 600,
-                          background: doc.validation!.isValid
+                          background: doc.status_ia === 'Aprovado'
                             ? 'rgba(16, 185, 129, 0.12)'
                             : 'rgba(239, 68, 68, 0.12)',
-                          color: doc.validation!.isValid ? 'var(--success-500)' : 'var(--danger-500)',
+                          color: doc.status_ia === 'Aprovado' ? 'var(--success-500)' : 'var(--danger-500)',
                         }}
                       >
-                        {doc.validation!.isValid ? '✅ Válido' : '❌ Inválido'}
+                        {doc.status_ia === 'Aprovado' ? '✅ IA Válido' : '❌ IA Rejeitado'}
                       </div>
                     </div>
 
                     <div className="detail-grid" style={{ marginBottom: '16px' }}>
                       <div className="detail-item">
-                        <span className="detail-label">Confiança OCR</span>
-                        <ConfidenceMeter value={doc.validation!.confidence} />
+                        <span className="detail-label">Confiança Leitura</span>
+                        <ConfidenceMeter value={doc.confianca_leitura_ia || 0} />
                       </div>
                       <div className="detail-item">
-                        <span className="detail-label">Qualidade da Imagem</span>
-                        <ConfidenceMeter value={doc.validation!.qualityScore} />
+                        <span className="detail-label">Data Emissão Capturada</span>
+                        <span className="detail-value">{doc.data_emissao_documento || 'ND'}</span>
                       </div>
                     </div>
 
-                    {/* Extracted data */}
-                    {Object.keys(doc.validation!.extractedData).length > 0 && (
-                      <div style={{ marginBottom: '12px' }}>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                          Dados Extraídos por OCR
-                        </div>
-                        <div className="detail-grid">
-                          {Object.entries(doc.validation!.extractedData).map(([k, v]) => (
-                            <div className="detail-item" key={k}>
-                              <span className="detail-label">{k.replace(/_/g, ' ')}</span>
-                              <span className="detail-value" style={{ fontSize: '0.85rem' }}>{v}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Expiry check */}
-                    {doc.validation!.expiryCheck && (
-                      <div
-                        className={`alert ${doc.validation!.expiryCheck.isExpired ? 'alert-error' : 'alert-success'}`}
-                        style={{ marginTop: '8px' }}
-                      >
-                        <span className="alert-icon">
-                          {doc.validation!.expiryCheck.isExpired ? '⏰' : '✅'}
-                        </span>
-                        <span>{doc.validation!.expiryCheck.message}</span>
-                      </div>
-                    )}
-
-                    {/* Issues */}
-                    {doc.validation!.issues.length > 0 && (
+                    {doc.alertas_ia && Object.keys(doc.alertas_ia).length > 0 && (
                       <div style={{ marginTop: '8px' }}>
-                        {doc.validation!.issues.map((issue, i) => (
-                          <div
-                            key={i}
-                            className="alert alert-warning"
-                            style={{ marginTop: '4px', padding: '8px 12px', fontSize: '0.82rem' }}
-                          >
-                            <span className="alert-icon" style={{ fontSize: '0.9rem' }}>⚠️</span>
-                            <span>{issue}</span>
-                          </div>
-                        ))}
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '6px' }}>Alertas:</div>
+                        <pre style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', padding: '8px', borderRadius: '4px' }}>
+                          {JSON.stringify(doc.alertas_ia, null, 2)}
+                        </pre>
                       </div>
                     )}
                   </div>

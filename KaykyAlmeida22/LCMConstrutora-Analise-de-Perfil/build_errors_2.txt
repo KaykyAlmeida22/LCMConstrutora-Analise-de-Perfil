@@ -1,0 +1,8 @@
+﻿
+> lcmconstrutora-analise-de-perfil@0.0.0 build
+> tsc -b && vite build
+
+src/pages/admin/NewCandidate.tsx(26,11): error TS6133: 'hasDdd' is declared but its value is never read.
+src/pages/admin/NewCandidate.tsx(27,11): error TS6133: 'hasFirstPart' is declared but its value is never read.
+src/pages/candidate/Onboarding.tsx(4,1): error TS6133: 'getRequiredDocuments' is declared but its value is never read.
+src/services/documentRules.ts(28,60): error TS6133: 'candidato' is declared but its value is never read.

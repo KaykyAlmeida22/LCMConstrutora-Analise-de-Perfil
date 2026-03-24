@@ -1,0 +1,57 @@
+﻿
+> lcmconstrutora-analise-de-perfil@0.0.0 build
+> tsc -b && vite build
+
+src/data/formSteps.ts(8,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/data/formSteps.ts(49,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/data/formSteps.ts(69,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/data/formSteps.ts(109,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/data/formSteps.ts(124,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/data/formSteps.ts(158,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/data/formSteps.ts(199,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/data/formSteps.ts(219,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/data/formSteps.ts(239,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/data/formSteps.ts(272,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/data/formSteps.ts(285,5): error TS2353: Object literal may only specify known properties, and 'questions' does not exist in type 'FormStep'.
+src/pages/admin/CandidateDetail.tsx(5,43): error TS2724: '"../../types"' has no exported member named 'DocumentType'. Did you mean 'Document'?
+src/pages/admin/NewCandidate.tsx(3,20): error TS2307: Cannot find module '../../services/mockDatabase' or its corresponding type declarations.
+src/pages/candidate/Landing.tsx(3,20): error TS2307: Cannot find module '../../services/mockDatabase' or its corresponding type declarations.
+src/pages/candidate/Landing.tsx(35,40): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/pages/candidate/Onboarding.tsx(5,20): error TS2307: Cannot find module '../../services/mockDatabase' or its corresponding type declarations.
+src/pages/candidate/Onboarding.tsx(6,28): error TS2305: Module '"../../types"' has no exported member 'FormQuestion'.
+src/pages/candidate/Onboarding.tsx(9,3): error TS2561: Object literal may only specify known properties, but 'estadoCivil' does not exist in type 'FormAnswers'. Did you mean to write 'estado_civil'?
+src/pages/candidate/Onboarding.tsx(36,42): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/pages/candidate/Onboarding.tsx(53,23): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'FormAnswers'.
+src/pages/candidate/Onboarding.tsx(62,35): error TS2339: Property 'questions' does not exist on type 'FormStep'.
+src/pages/candidate/Onboarding.tsx(63,36): error TS7006: Parameter 'q' implicitly has an 'any' type.
+src/pages/candidate/Onboarding.tsx(65,19): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'FormAnswers'.
+src/pages/candidate/Onboarding.tsx(170,19): error TS2339: Property 'questions' does not exist on type 'FormStep'.
+src/pages/candidate/Onboarding.tsx(170,61): error TS7006: Parameter 'q' implicitly has an 'any' type.
+src/pages/candidate/Onboarding.tsx(179,48): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'FormAnswers'.
+src/pages/candidate/Onboarding.tsx(186,48): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'FormAnswers'.
+src/pages/candidate/Onboarding.tsx(196,38): error TS7006: Parameter 'opt' implicitly has an 'any' type.
+src/pages/candidate/Onboarding.tsx(200,50): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'FormAnswers'.
+src/pages/candidate/Onboarding.tsx(204,26): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'FormAnswers'.
+src/pages/candidate/Onboarding.tsx(216,28): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'FormAnswers'.
+src/pages/candidate/Onboarding.tsx(225,28): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'FormAnswers'.
+src/pages/candidate/Onboarding.tsx(234,28): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'FormAnswers'.
+src/pages/candidate/Upload.tsx(3,20): error TS2307: Cannot find module '../../services/mockDatabase' or its corresponding type declarations.
+src/pages/candidate/Upload.tsx(5,10): error TS2305: Module '"../../types"' has no exported member 'DOCUMENT_LABELS'.
+src/pages/candidate/Upload.tsx(6,26): error TS2724: '"../../types"' has no exported member named 'DocumentType'. Did you mean 'Document'?
+src/pages/candidate/Upload.tsx(6,40): error TS2305: Module '"../../types"' has no exported member 'CandidateDocument'.
+src/pages/candidate/Upload.tsx(105,35): error TS2551: Property 'documents' does not exist on type 'Candidate'. Did you mean 'documentos'?
+src/pages/candidate/Upload.tsx(105,50): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/pages/candidate/Upload.tsx(106,33): error TS2339: Property 'requiredDocuments' does not exist on type 'Candidate'.
+src/pages/candidate/Upload.tsx(106,59): error TS7006: Parameter 'dt' implicitly has an 'any' type.
+src/pages/candidate/Upload.tsx(107,30): error TS2551: Property 'documents' does not exist on type 'Candidate'. Did you mean 'documentos'?
+src/pages/candidate/Upload.tsx(145,24): error TS2339: Property 'nome' does not exist on type 'Candidate'.
+src/pages/candidate/Upload.tsx(156,44): error TS2339: Property 'requiredDocuments' does not exist on type 'Candidate'.
+src/pages/candidate/Upload.tsx(170,37): error TS2339: Property 'requiredDocuments' does not exist on type 'Candidate'.
+src/pages/candidate/Upload.tsx(170,97): error TS2339: Property 'requiredDocuments' does not exist on type 'Candidate'.
+src/pages/candidate/Upload.tsx(205,33): error TS7006: Parameter 'docType' implicitly has an 'any' type.
+src/pages/candidate/Upload.tsx(242,30): error TS7006: Parameter 'doc' implicitly has an 'any' type.
+src/pages/candidate/Upload.tsx(301,55): error TS7006: Parameter 'issue' implicitly has an 'any' type.
+src/pages/candidate/Upload.tsx(301,62): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/services/aiValidation.ts(1,15): error TS2724: '"../types"' has no exported member named 'DocumentType'. Did you mean 'Document'?
+src/services/aiValidation.ts(1,29): error TS2305: Module '"../types"' has no exported member 'ValidationResult'.
+src/services/documentRules.ts(28,60): error TS6133: 'candidato' is declared but its value is never read.

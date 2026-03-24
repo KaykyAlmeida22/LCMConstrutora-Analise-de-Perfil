@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../../services/mockDatabase';
+import { api } from '../../services/api';
 
 export default function NewCandidate() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    nome: '',
+    nome_completo: '',
     cpf: '',
     telefone: '',
-    email: '',
-    dataNascimento: '',
+    endereco: '',
+    municipio_projeto: 'Extrema', // Padrão Extrema
   });
 
   function formatCPF(value: string): string {
@@ -23,7 +23,10 @@ export default function NewCandidate() {
 
   function formatPhone(value: string): string {
     const digits = value.replace(/\D/g, '').slice(0, 11);
-    if (digits.length <= 2) return `(${digits}`;
+    const hasDdd = digits.length > 2;
+    const hasFirstPart = digits.length > 7;
+    
+    if (digits.length <= 2) return digits;
     if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
     return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
   }
@@ -36,18 +39,29 @@ export default function NewCandidate() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.nome.trim() || !form.cpf.trim()) return;
+    if (!form.nome_completo.trim() || !form.cpf.trim()) return;
     setSaving(true);
-    const candidate = await db.createCandidate({
-      nome: form.nome.trim(),
-      cpf: form.cpf.trim(),
-      telefone: form.telefone.trim(),
-      email: form.email.trim(),
-      dataNascimento: form.dataNascimento,
-      formAnswers: null,
-    });
-    setSaving(false);
-    navigate(`/admin/candidato/${candidate.id}`);
+    
+    try {
+      const candidate = await api.createCandidate({
+        nome_completo: form.nome_completo.trim(),
+        cpf: form.cpf.trim(),
+        telefone: form.telefone.trim(),
+        endereco: form.endereco.trim(),
+        municipio_projeto: form.municipio_projeto,
+      });
+
+      if (candidate) {
+        navigate(`/admin/candidato/${candidate.id}`);
+      } else {
+        alert('Erro ao criar candidato. Verifique se o CPF já existe.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Ocorreu um erro inesperado.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -57,34 +71,32 @@ export default function NewCandidate() {
         onClick={() => navigate('/admin')}
         style={{ marginBottom: '16px' }}
       >
-        ← Voltar
+        ← Voltar ao Painel
       </button>
 
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '4px' }}>
+      <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '4px' }}>
         Novo Candidato
       </h1>
       <p className="text-muted" style={{ marginBottom: '32px' }}>
-        Cadastre as informações básicas do candidato ao programa MCMV.
+        Cadastre as informações básicas para iniciar o processo pré-cadastral.
       </p>
 
       <form onSubmit={handleSubmit} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div className="form-group">
-          <label className="form-label" htmlFor="nome">Nome Completo *</label>
+          <label className="form-label">Nome Completo *</label>
           <input
-            id="nome"
             className="form-input"
             placeholder="Ex: Maria da Silva Santos"
-            value={form.nome}
-            onChange={(e) => handleChange('nome', e.target.value)}
+            value={form.nome_completo}
+            onChange={(e) => handleChange('nome_completo', e.target.value)}
             required
           />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div className="form-group">
-            <label className="form-label" htmlFor="cpf">CPF *</label>
+            <label className="form-label">CPF *</label>
             <input
-              id="cpf"
               className="form-input"
               placeholder="000.000.000-00"
               value={form.cpf}
@@ -93,46 +105,45 @@ export default function NewCandidate() {
             />
           </div>
           <div className="form-group">
-            <label className="form-label" htmlFor="dataNascimento">Data de Nascimento</label>
+            <label className="form-label">Telefone</label>
             <input
-              id="dataNascimento"
-              className="form-input"
-              type="date"
-              value={form.dataNascimento}
-              onChange={(e) => handleChange('dataNascimento', e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="telefone">Telefone</label>
-            <input
-              id="telefone"
               className="form-input"
               placeholder="(00) 00000-0000"
               value={form.telefone}
               onChange={(e) => handleChange('telefone', e.target.value)}
             />
           </div>
-          <div className="form-group">
-            <label className="form-label" htmlFor="email">Email</label>
-            <input
-              id="email"
-              className="form-input"
-              type="email"
-              placeholder="email@exemplo.com"
-              value={form.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-            />
-          </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Endereço (Opcional no cadastro inicial)</label>
+          <input
+            className="form-input"
+            placeholder="Rua, Número, Bairro..."
+            value={form.endereco}
+            onChange={(e) => handleChange('endereco', e.target.value)}
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Município do Projeto *</label>
+          <select 
+            className="form-input"
+            value={form.municipio_projeto}
+            onChange={(e) => handleChange('municipio_projeto', e.target.value)}
+            required
+          >
+            <option value="Extrema">Extrema - MG</option>
+            <option value="Mariana">Mariana - MG</option>
+            <option value="Outros">Outros</option>
+          </select>
         </div>
 
         <div className="flex justify-between" style={{ marginTop: '12px' }}>
           <button type="button" className="btn btn-ghost" onClick={() => navigate('/admin')}>
             Cancelar
           </button>
-          <button type="submit" className="btn btn-primary btn-lg" disabled={saving || !form.nome.trim() || !form.cpf.trim()}>
+          <button type="submit" className="btn btn-primary btn-lg" disabled={saving || !form.nome_completo.trim() || !form.cpf.trim()}>
             {saving ? 'Cadastrando...' : '✅ Cadastrar Candidato'}
           </button>
         </div>

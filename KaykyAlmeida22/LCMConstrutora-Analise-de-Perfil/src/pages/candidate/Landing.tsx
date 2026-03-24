@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../../services/mockDatabase';
+import { api } from '../../services/api';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -30,19 +30,25 @@ export default function Landing() {
     }
 
     setLoading(true);
-    // Find candidate by CPF
-    const candidates = await db.getCandidates();
-    const candidate = candidates.find((c) => c.cpf.replace(/\D/g, '') === cleanCpf);
-    setLoading(false);
-
-    if (candidate) {
-      if (!candidate.formAnswers) {
-        navigate(`/onboarding?id=${candidate.id}`);
+    try {
+      // Find candidate by CPF
+      const candidates = await api.getCandidates();
+      const candidate = candidates.find((c) => c.cpf.replace(/\D/g, '') === cleanCpf);
+      
+      if (candidate) {
+        if (!candidate.fichas_cadastrais) {
+          navigate(`/onboarding?id=${candidate.id}`);
+        } else {
+          navigate(`/upload?id=${candidate.id}`);
+        }
       } else {
-        navigate(`/upload?id=${candidate.id}`);
+        setError('CPF não encontrado. Se você ainda não tem cadastro, será inserido em breve pela equipe da LCM.');
       }
-    } else {
-      setError('CPF não encontrado. Se você ainda não tem cadastro, será inserido em breve.');
+    } catch (err) {
+      console.error(err);
+      setError('Ocorreu um erro ao consultar seu CPF. Tente novamente mais tarde.');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -82,8 +88,8 @@ export default function Landing() {
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Minha Casa Minha Vida</div>
           </div>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin/login')}>
-          Acesso Restrito
+        <button className="btn btn-primary btn-sm" onClick={() => navigate('/admin/login')}>
+          Acesso Analista
         </button>
       </header>
 
@@ -91,10 +97,10 @@ export default function Landing() {
       <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div style={{ maxWidth: '480px', width: '100%', textAlign: 'center' }}>
           <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🏠</div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>
-            Acesso ao <span style={{ color: 'var(--primary-400)' }}>Portal do Candidato</span>
+          <h1 style={{ fontSize: '2.25rem', fontWeight: 800, marginBottom: '16px', lineHeight: 1.1 }}>
+            Acesso ao <span className="text-gradient">Portal do Candidato</span>
           </h1>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '40px', fontSize: '1.05rem' }}>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '40px', fontSize: '1.05rem', lineHeight: 1.6 }}>
             Acompanhe o status da sua inscrição, preencha sua ficha cadastral e envie seus documentos de forma rápida e segura.
           </p>
 
@@ -133,10 +139,10 @@ export default function Landing() {
               style={{ width: '100%', padding: '16px' }}
               disabled={loading || cpf.length < 14}
             >
-              {loading ? 'Consultando...' : 'Entrar →'}
+              {loading ? 'Consultando...' : 'Entrar Agora →'}
             </button>
             <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Apenas candidatos convidados têm acesso a este portal.
+              Apenas candidatos registrados pela LCM têm acesso.
             </div>
           </form>
         </div>

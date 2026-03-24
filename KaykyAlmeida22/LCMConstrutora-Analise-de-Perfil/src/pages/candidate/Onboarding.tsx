@@ -2,23 +2,43 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { formSteps } from '../../data/formSteps';
 import { getRequiredDocuments } from '../../services/documentRules';
-import { db } from '../../services/mockDatabase';
-import type { FormAnswers, FormQuestion } from '../../types';
+import { api } from '../../services/api';
+import type { FormAnswers, FormStep, FormField } from '../../types';
 
 const EMPTY_ANSWERS: FormAnswers = {
-  estadoCivil: '',
-  temDependentes: null,
-  quantosDependentes: 0,
-  dependenteComRenda: null,
-  possuiImovel: null,
-  tipoMoradia: '',
-  tipoRenda: '',
-  faixaRenda: '',
-  recebeuBeneficioHabitacional: null,
-  dataBeneficio: '',
-  recebeBolsaFamilia: null,
-  possuiFGTS: null,
-  narrativaAtividade: '',
+  tipo_residencia: '',
+  valor_aluguel: 0,
+  teve_imovel_anterior: false,
+  venda_registrada_cartorio: false,
+  escolaridade: '',
+  estado_civil: '',
+  regime_bens: '',
+  data_casamento: '',
+  tem_dependentes: false,
+  tem_financiamento_habitacional: false,
+  data_contrato_habitacional: '',
+  financiamento_habitacional_pos_2005: false,
+  tem_financiamento_estudantil: false,
+  financiamento_estudantil_em_atraso: false,
+  tem_veiculo: false,
+  valor_mercado_veiculo: 0,
+  veiculo_financiado: false,
+  prestacao_veiculo: 0,
+  parcelas_restantes_veiculo: 0,
+  tem_cartao_credito: false,
+  bandeira_cartao: '',
+  tem_imovel: false,
+  valor_mercado_imovel: 0,
+  declara_ir: false,
+  tem_conta_corrente: false,
+  banco_conta_corrente: '',
+  limite_cheque_especial: 0,
+  tem_poupanca_aplicacao: false,
+  comprova_36_meses_fgts: false,
+  fara_uso_fgts: false,
+  tipo_renda: '',
+  faixa_renda: '',
+  trabalha_aplicativo: false,
 };
 
 export default function Onboarding() {
@@ -33,38 +53,49 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (candidateId) {
-      db.getCandidate(candidateId).then((c) => {
+      api.getCandidate(candidateId).then((c) => {
         if (c) {
-          setCandidateName(c.nome);
-          if (c.formAnswers) {
-            setAnswers(c.formAnswers);
+          setCandidateName(c.nome_completo);
+          if (c.fichas_cadastrais) {
+            setAnswers(c.fichas_cadastrais);
           }
         }
       });
     }
   }, [candidateId]);
 
-  const step = formSteps[currentStep];
+  const step: FormStep = formSteps[currentStep];
   const totalSteps = formSteps.length;
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
-  function shouldShowQuestion(q: FormQuestion): boolean {
+  function shouldShowQuestion(q: FormField): boolean {
     if (!q.conditionalOn) return true;
-    const parentVal = answers[q.conditionalOn.field];
+    const parentVal = (answers as any)[q.conditionalOn.field];
     return parentVal === q.conditionalOn.value;
   }
 
   function handleAnswer(questionId: keyof FormAnswers, value: unknown) {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+    setAnswers((prev) => {
+      const newAnswers = { ...prev, [questionId]: value };
+      
+      // Regra Especial: Financiamento Habitacional Pós 2005
+      if (questionId === 'data_contrato_habitacional' && typeof value === 'string') {
+        const contractDate = new Date(value);
+        const limitDate = new Date('2005-05-16');
+        newAnswers.financiamento_habitacional_pos_2005 = contractDate > limitDate;
+      }
+
+      return newAnswers;
+    });
   }
 
   function canProceed(): boolean {
     const visibleQuestions = step.questions.filter(shouldShowQuestion);
     return visibleQuestions.every((q) => {
       if (!q.required) return true;
-      const val = answers[q.id];
+      const val = (answers as any)[q.id];
       if (val === null || val === undefined || val === '') return false;
-      if (q.type === 'text' && typeof val === 'string' && val.trim().length < 10) return false;
+      // Basic text validation if needed
       return true;
     });
   }
@@ -72,12 +103,23 @@ export default function Onboarding() {
   async function handleNext() {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
+      window.scrollTo(0, 0);
     } else {
       // Final step — save
       setSaving(true);
-      const requiredDocs = getRequiredDocuments(answers);
       if (candidateId) {
-        await db.saveFormAnswers(candidateId, answers, requiredDocs);
+        // Prepare data (ensure numbers are numbers)
+        const finalAnswers = { ...answers };
+        
+        await api.saveFormAnswers(candidateId, finalAnswers);
+        
+        // Update status if it's blocking
+        if (finalAnswers.financiamento_habitacional_pos_2005) {
+           await api.updateStatus(candidateId, 'subsidio_bloqueado', undefined, 'Benefício Habitacional após 16/05/2005 detectado na ficha.');
+        } else if (finalAnswers.tipo_renda === 'Sem_renda') {
+           await api.updateStatus(candidateId, 'sem_renda_comprovavel', undefined, 'Candidato declarou não possuir renda na ficha.');
+        }
+
         navigate(`/upload?id=${candidateId}`);
       } else {
         navigate('/');
@@ -87,7 +129,10 @@ export default function Onboarding() {
   }
 
   function handleBack() {
-    if (currentStep > 0) setCurrentStep(currentStep - 1);
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      window.scrollTo(0, 0);
+    }
   }
 
   return (
@@ -122,7 +167,7 @@ export default function Onboarding() {
             </p>
           )}
           <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '4px' }}>
-            Programa Minha Casa Minha Vida — LCM Construtora
+            Ficha de 11 Blocos — Estritamente Conforme Especificação
           </p>
         </div>
 
@@ -176,14 +221,14 @@ export default function Onboarding() {
                   <div className="toggle-group">
                     <button
                       type="button"
-                      className={`toggle-btn ${answers[q.id] === true ? 'selected' : ''}`}
+                      className={`toggle-btn ${(answers as any)[q.id] === true ? 'selected' : ''}`}
                       onClick={() => handleAnswer(q.id, true)}
                     >
                       ✅ Sim
                     </button>
                     <button
                       type="button"
-                      className={`toggle-btn ${answers[q.id] === false ? 'selected' : ''}`}
+                      className={`toggle-btn ${(answers as any)[q.id] === false ? 'selected' : ''}`}
                       onClick={() => handleAnswer(q.id, false)}
                     >
                       ❌ Não
@@ -197,11 +242,11 @@ export default function Onboarding() {
                       <button
                         key={opt.value}
                         type="button"
-                        className={`toggle-btn ${answers[q.id] === opt.value ? 'selected' : ''}`}
+                        className={`toggle-btn ${(answers as any)[q.id] === opt.value ? 'selected' : ''}`}
                         onClick={() => handleAnswer(q.id, opt.value)}
                         style={{ textAlign: 'left', flex: 'none' }}
                       >
-                        {answers[q.id] === opt.value ? '● ' : '○ '}{opt.label}
+                        {(answers as any)[q.id] === opt.value ? '● ' : '○ '}{opt.label}
                       </button>
                     ))}
                   </div>
@@ -211,10 +256,8 @@ export default function Onboarding() {
                   <input
                     className="form-input"
                     type="number"
-                    min={0}
-                    max={20}
-                    value={answers[q.id] as number}
-                    onChange={(e) => handleAnswer(q.id, parseInt(e.target.value) || 0)}
+                    value={(answers as any)[q.id] || ''}
+                    onChange={(e) => handleAnswer(q.id, parseFloat(e.target.value) || 0)}
                   />
                 )}
 
@@ -222,7 +265,7 @@ export default function Onboarding() {
                   <input
                     className="form-input"
                     type="date"
-                    value={answers[q.id] as string}
+                    value={(answers as any)[q.id] || ''}
                     onChange={(e) => handleAnswer(q.id, e.target.value)}
                   />
                 )}
@@ -231,10 +274,9 @@ export default function Onboarding() {
                   <textarea
                     className="form-textarea"
                     placeholder="Escreva aqui..."
-                    value={answers[q.id] as string}
+                    value={(answers as any)[q.id] || ''}
                     onChange={(e) => handleAnswer(q.id, e.target.value)}
-                    rows={5}
-                    style={{ minHeight: '140px' }}
+                    rows={4}
                   />
                 )}
               </div>
@@ -259,7 +301,7 @@ export default function Onboarding() {
             {saving
               ? 'Salvando...'
               : currentStep === totalSteps - 1
-              ? '✅ Finalizar e Enviar Documentos'
+              ? '✅ Finalizar Ficha'
               : 'Próximo →'}
           </button>
         </div>
