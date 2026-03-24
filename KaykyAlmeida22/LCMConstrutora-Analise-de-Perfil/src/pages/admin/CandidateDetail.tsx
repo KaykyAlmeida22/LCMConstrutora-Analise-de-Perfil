@@ -117,7 +117,7 @@ export default function CandidateDetail() {
   }
 
   const documentos = candidate.documentos || [];
-  const reqList = candidate.fichas_cadastrais ? getRequiredDocuments(candidate.fichas_cadastrais, candidate) : [];
+  const reqList = candidate.fichas_cadastrais ? getRequiredDocuments(candidate.fichas_cadastrais) : [];
   
   const docsUploaded = documentos.length;
   const docsRequired = reqList.length;

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { formSteps } from '../../data/formSteps';
-import { getRequiredDocuments } from '../../services/documentRules';
 import { api } from '../../services/api';
 import type { FormAnswers, FormStep, FormField } from '../../types';
 

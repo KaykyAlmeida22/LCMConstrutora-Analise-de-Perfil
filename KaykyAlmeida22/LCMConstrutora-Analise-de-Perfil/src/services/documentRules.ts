@@ -1,4 +1,4 @@
-import type { FormAnswers, Candidate } from '../types';
+import type { FormAnswers } from '../types';
 
 export type DocumentType = 
   | 'identidade_rg_cnh'
@@ -25,7 +25,7 @@ export type DocumentType =
   | 'comprovacao_responsabilidade_legal_dependente'
   | 'outros';
 
-export function getRequiredDocuments(answers: FormAnswers, candidato?: Partial<Candidate>): DocumentType[] {
+export function getRequiredDocuments(answers: FormAnswers): DocumentType[] {
   const req: DocumentType[] = [];
 
   // Padrão Geral (sempre obrigatórios)

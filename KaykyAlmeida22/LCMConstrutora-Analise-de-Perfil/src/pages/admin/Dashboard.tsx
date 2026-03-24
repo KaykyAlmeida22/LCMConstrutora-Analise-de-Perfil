@@ -172,7 +172,7 @@ export default function Dashboard() {
               </tr>
             ) : (
               filtered.map((c) => {
-                const reqList = c.fichas_cadastrais ? getRequiredDocuments(c.fichas_cadastrais, c) : [];
+                const reqList = c.fichas_cadastrais ? getRequiredDocuments(c.fichas_cadastrais) : [];
                 const docsRequired = reqList.length;
                 const docsUploaded = (c.documentos || []).length;
                 

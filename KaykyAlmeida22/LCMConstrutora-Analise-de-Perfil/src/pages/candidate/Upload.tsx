@@ -119,7 +119,7 @@ export default function Upload() {
   }
 
   const documentos = candidate.documentos || [];
-  const reqList = candidate.fichas_cadastrais ? getRequiredDocuments(candidate.fichas_cadastrais, candidate) : [];
+  const reqList = candidate.fichas_cadastrais ? getRequiredDocuments(candidate.fichas_cadastrais) : [];
   
   const uploadedTypes = documentos.map((d) => d.tipo_documento);
   const missingDocs = reqList.filter((dt) => !uploadedTypes.includes(dt));
