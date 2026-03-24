@@ -58,6 +58,9 @@ export default function CandidateDetail() {
   const [activeTab, setActiveTab] = useState<'dados' | 'documentos' | 'validacao'>('dados');
   const [observations, setObservations] = useState('');
   const [saving, setSaving] = useState(false);
+  const [selectedDocUrl, setSelectedDocUrl] = useState<string | null>(null);
+  const [rejectingDocId, setRejectingDocId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     loadCandidate();
@@ -87,13 +90,29 @@ export default function CandidateDetail() {
     setSaving(false);
   }
 
-  async function handleDocAction(doc: Document, action: 'Aprovado' | 'Rejeitado') {
+  async function handleDocAction(doc: Document, action: 'Aprovado' | 'Rejeitado', reason?: string) {
     if (!candidate || !doc.id) return;
     await api.updateDocument(doc.id, { 
       status_upload: action,
-      aprovado_pelo_analista: action === 'Aprovado'
+      aprovado_pelo_analista: action === 'Aprovado',
+      motivo_rejeicao: reason || ''
     });
+    
+    // Auto status check for overall progression if needed
+    // Example: If all are approved, Candidate status -> 'aprovado'
+    // But for now, just reload
+    
     await loadCandidate();
+  }
+
+  async function submitRejection() {
+    if (!rejectingDocId) return;
+    const doc = candidate?.documentos?.find(d => d.id === rejectingDocId);
+    if (doc) {
+      await handleDocAction(doc, 'Rejeitado', rejectReason);
+    }
+    setRejectingDocId(null);
+    setRejectReason('');
   }
 
   async function handleSaveObservations() {
@@ -449,9 +468,9 @@ export default function CandidateDetail() {
                       <div className="flex gap-2" style={{ marginTop: '8px' }}>
                         <button
                           className="btn btn-outline btn-sm"
-                          onClick={() => window.open(doc.arquivo_url, '_blank')}
+                          onClick={() => setSelectedDocUrl(doc.arquivo_url)}
                         >
-                          👁️ Ver
+                          👁️ Ver 
                         </button>
                         <button
                           className="btn btn-success btn-sm"
@@ -462,12 +481,17 @@ export default function CandidateDetail() {
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
-                          onClick={() => handleDocAction(doc, 'Rejeitado')}
+                          onClick={() => setRejectingDocId(doc.id!)}
                           disabled={doc.status_upload === 'Rejeitado'}
                         >
                           ❌ 
                         </button>
                       </div>
+                      {doc.motivo_rejeicao && doc.status_upload === 'Rejeitado' && (
+                        <div style={{ marginTop: '8px', fontSize: '0.78rem', color: 'var(--danger-500)' }}>
+                          <strong>Motivo:</strong> {doc.motivo_rejeicao}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
@@ -546,6 +570,74 @@ export default function CandidateDetail() {
                 ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Viewer Modal */}
+      {selectedDocUrl && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <div style={{ padding: '16px', display: 'flex', justifyContent: 'flex-end', background: 'var(--bg-primary)' }}>
+            <button className="btn btn-primary" onClick={() => setSelectedDocUrl(null)}>Fechar Visualizador ✕</button>
+          </div>
+          <div style={{ flex: 1, padding: '24px', display: 'flex', justifyContent: 'center' }}>
+            {/* Can be PDF or Image */}
+            <iframe 
+               src={selectedDocUrl} 
+               style={{ width: '100%', maxWidth: '1000px', height: '100%', backgroundColor: 'white', border: 'none', borderRadius: '8px' }}
+               title="Document Viewer"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Rejection Modal */}
+      {rejectingDocId && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div className="card-glass" style={{ width: '100%', maxWidth: '400px', padding: '24px' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '16px' }}>Rejeitar Documento</h3>
+            <div className="form-group">
+              <label className="form-label">Por que o documento está sendo rejeitado?</label>
+              <textarea 
+                className="form-textarea" 
+                rows={3}
+                placeholder="Exemplo: Documento ilegível, data de emissão expirou..."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-between" style={{ marginTop: '24px' }}>
+              <button 
+                className="btn btn-ghost" 
+                onClick={() => {
+                  setRejectingDocId(null);
+                  setRejectReason('');
+                }}>
+                Cancelar
+              </button>
+              <button 
+                className="btn btn-danger" 
+                onClick={submitRejection}
+                disabled={!rejectReason.trim()}
+              >
+                Confirmar Rejeição
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

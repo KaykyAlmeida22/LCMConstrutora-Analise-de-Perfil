@@ -5,6 +5,7 @@ import { STATUS_LABELS, STATUS_COLORS } from '../../types';
 import type { Candidate, CandidateStatus } from '../../types';
 import StatusBadge from '../../components/shared/StatusBadge';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import { supabase } from '../../lib/supabase';
 import { getRequiredDocuments } from '../../services/documentRules';
 
 export default function Dashboard() {
@@ -17,6 +18,22 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadData();
+
+    // Setup realtime subscription
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public' },
+        (_payload) => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   async function loadData() {
@@ -172,7 +189,8 @@ export default function Dashboard() {
               </tr>
             ) : (
               filtered.map((c) => {
-                const reqList = c.fichas_cadastrais ? getRequiredDocuments(c.fichas_cadastrais) : [];
+                const _fichas = Array.isArray(c.fichas_cadastrais) ? c.fichas_cadastrais[0] : c.fichas_cadastrais;
+                const reqList = _fichas ? getRequiredDocuments(_fichas) : [];
                 const docsRequired = reqList.length;
                 const docsUploaded = (c.documentos || []).length;
                 
