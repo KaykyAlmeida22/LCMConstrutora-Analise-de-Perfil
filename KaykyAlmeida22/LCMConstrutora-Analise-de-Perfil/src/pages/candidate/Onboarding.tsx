@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { formSteps } from '../../data/formSteps';
 import { api } from '../../services/api';
 import type { FormAnswers, FormStep, FormField, Dependent } from '../../types';
+import { Building2, ArrowRight, ArrowLeft, Check, X, Plus } from 'lucide-react';
 
 const EMPTY_ANSWERS: FormAnswers = {
   tipo_residencia: '',
@@ -148,38 +149,45 @@ export default function Onboarding() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '24px' }}>
-      <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '32px 24px', position: 'relative', overflow: 'hidden' }}>
+      
+      {/* Background Glow */}
+      <div style={{
+         position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100vw', height: '40vh',
+         background: 'radial-gradient(ellipse at top, rgba(59, 130, 246, 0.1) 0%, rgba(0,0,0,0) 70%)',
+         zIndex: 0, pointerEvents: 'none'
+      }} />
+
+      <div style={{ maxWidth: '680px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <div className="animate-slideDown" style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div
             style={{
               width: 56,
               height: 56,
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, var(--primary-500), var(--primary-700))',
+              borderRadius: '16px',
+              background: 'linear-gradient(135deg, var(--primary-600), var(--primary-800))',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.3rem',
-              fontWeight: 800,
               color: 'white',
-              marginBottom: '16px',
-              boxShadow: '0 4px 16px rgba(59, 130, 246, 0.3)',
+              marginBottom: '20px',
+              boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4), inset 0 1px 1px rgba(255,255,255,0.2)',
+              border: '1px solid rgba(255,255,255,0.1)'
             }}
           >
-            LCM
+            <Building2 size={28} strokeWidth={1.5} />
           </div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '4px' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em' }}>
             Ficha Pré-Cadastral
           </h1>
           {candidateName && (
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              Candidato(a): <strong style={{ color: 'var(--text-primary)' }}>{candidateName}</strong>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '4px' }}>
+              Candidato(a): <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{candidateName}</strong>
             </p>
           )}
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '4px' }}>
-            Ficha de 11 Blocos — Estritamente Conforme Especificação
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            Preencha seus dados com atenção. Etapa {currentStep + 1} de {totalSteps}.
           </p>
         </div>
 
@@ -236,31 +244,40 @@ export default function Onboarding() {
                       className={`toggle-btn ${(answers as any)[q.id] === true ? 'selected' : ''}`}
                       onClick={() => handleAnswer(q.id, true)}
                     >
-                      ✅ Sim
+                      <Check size={18} className={(answers as any)[q.id] === true ? 'text-white' : 'text-success-500'} /> Sim
                     </button>
                     <button
                       type="button"
                       className={`toggle-btn ${(answers as any)[q.id] === false ? 'selected' : ''}`}
                       onClick={() => handleAnswer(q.id, false)}
                     >
-                      ❌ Não
+                      <X size={18} className={(answers as any)[q.id] === false ? 'text-white' : 'text-danger-500'} /> Não
                     </button>
                   </div>
                 )}
 
                 {q.type === 'select' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {q.options?.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        className={`toggle-btn ${(answers as any)[q.id] === opt.value ? 'selected' : ''}`}
-                        onClick={() => handleAnswer(q.id, opt.value)}
-                        style={{ textAlign: 'left', flex: 'none' }}
-                      >
-                        {(answers as any)[q.id] === opt.value ? '● ' : '○ '}{opt.label}
-                      </button>
-                    ))}
+                    {q.options?.map((opt) => {
+                      const isSelected = (answers as any)[q.id] === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={`toggle-btn ${isSelected ? 'selected' : ''}`}
+                          onClick={() => handleAnswer(q.id, opt.value)}
+                          style={{ textAlign: 'left', flex: 'none', justifyContent: 'flex-start' }}
+                        >
+                          <div style={{ 
+                            width: 16, height: 16, borderRadius: '50%', 
+                            border: `2px solid ${isSelected ? 'white' : 'var(--border-strong)'}`,
+                            background: isSelected ? 'white' : 'transparent',
+                            marginRight: '8px', flexShrink: 0
+                           }} />
+                          {opt.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -414,8 +431,9 @@ export default function Onboarding() {
                           { nome: '', idade: 0, grau_parentesco: '', tem_renda: false }
                         ]);
                       }}
+                      style={{ borderStyle: 'dashed' }}
                     >
-                      + Adicionar Dependente
+                      <Plus size={16} /> Adicionar Dependente
                     </button>
                   </div>
                 )}
@@ -425,24 +443,27 @@ export default function Onboarding() {
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-between">
+        <div className="flex justify-between" style={{ marginTop: '32px' }}>
           <button
             className="btn btn-ghost"
             onClick={handleBack}
             disabled={currentStep === 0}
+            style={{ visibility: currentStep === 0 ? 'hidden' : 'visible' }}
           >
-            ← Voltar
+            <ArrowLeft size={18} /> Voltar
           </button>
+          
           <button
             className="btn btn-primary btn-lg"
             onClick={handleNext}
             disabled={!canProceed() || saving}
+            style={{ minWidth: '180px', justifyContent: 'center' }}
           >
             {saving
               ? 'Salvando...'
               : currentStep === totalSteps - 1
-              ? '✅ Finalizar Ficha'
-              : 'Próximo →'}
+              ? <><Check size={20} /> Finalizar Ficha</>
+              : <>Próximo <ArrowRight size={20} /></>}
           </button>
         </div>
       </div>

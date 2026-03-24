@@ -6,6 +6,11 @@ import type { Candidate, CandidateStatus, DocumentType, Document } from '../../t
 import StatusBadge from '../../components/shared/StatusBadge';
 import ConfidenceMeter from '../../components/shared/ConfidenceMeter';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import { 
+  ArrowLeft, Check, X, AlertTriangle, FileText, CheckCircle, 
+  XCircle, FileWarning, User, Bot, FileEdit, Ban, Wallet, 
+  BookOpen, Paperclip, Eye 
+} from 'lucide-react';
 
 const FORM_ANSWER_LABELS: Record<string, string> = {
   tipo_residencia: 'Tipo de Residência',
@@ -126,7 +131,9 @@ export default function CandidateDetail() {
   if (!candidate) {
     return (
       <div className="empty-state">
-        <div className="empty-state-icon">❌</div>
+        <div style={{ color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+          <XCircle size={48} strokeWidth={1} />
+        </div>
         <div className="empty-state-title">Candidato não encontrado</div>
         <button className="btn btn-primary" onClick={() => navigate('/admin')}>
           Voltar ao Painel
@@ -155,7 +162,7 @@ export default function CandidateDetail() {
           onClick={() => navigate('/admin/candidatos')}
           style={{ marginBottom: '16px' }}
         >
-          ← Voltar aos Candidatos
+          <ArrowLeft size={16} /> Voltar aos Candidatos
         </button>
 
         <div className="flex items-center justify-between" style={{ flexWrap: 'wrap', gap: '16px' }}>
@@ -195,21 +202,21 @@ export default function CandidateDetail() {
               onClick={() => handleStatusChange('aprovado')}
               disabled={saving}
             >
-              ✅ Aprovar Final
+              <Check size={16} /> Aprovar Final
             </button>
             <button
               className="btn btn-danger"
               onClick={() => handleStatusChange('sem_renda_comprovavel')}
               disabled={saving}
             >
-              ❌ Reprovar (Sem Renda)
+              <X size={16} /> Reprovar (Sem Renda)
             </button>
             <button
               className="btn btn-outline"
               onClick={() => handleStatusChange('aguardando_correcao')}
               disabled={saving}
             >
-              ⚠️ Pedir Correção
+              <AlertTriangle size={16} /> Pedir Correção
             </button>
           </div>
         </div>
@@ -218,28 +225,28 @@ export default function CandidateDetail() {
       {/* Quick Stats */}
       <div className="stats-grid" style={{ marginBottom: '24px' }}>
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--primary-400)' }}>📄</div>
+          <div className="stat-icon" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--primary-400)' }}><FileText size={24} /></div>
           <div>
             <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsUploaded}/{docsRequired}</div>
             <div className="stat-label">Documentos Enviados</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--success-500)' }}>✅</div>
+          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--success-500)' }}><CheckCircle size={24} /></div>
           <div>
             <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsApproved}</div>
             <div className="stat-label">Doc. Aprovados</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--danger-500)' }}>❌</div>
+          <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--danger-500)' }}><XCircle size={24} /></div>
           <div>
             <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsRejected}</div>
             <div className="stat-label">Doc. Rejeitados</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--accent-500)' }}>📋</div>
+          <div className="stat-icon" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--accent-500)' }}><FileWarning size={24} /></div>
           <div>
             <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsMissing.length}</div>
             <div className="stat-label">Doc. Faltantes</div>
@@ -250,13 +257,13 @@ export default function CandidateDetail() {
       {/* Tabs */}
       <div className="tabs">
         <button className={`tab ${activeTab === 'dados' ? 'active' : ''}`} onClick={() => setActiveTab('dados')}>
-          📋 Dados do Candidato
+          <User size={16} /> Dados do Candidato
         </button>
         <button className={`tab ${activeTab === 'documentos' ? 'active' : ''}`} onClick={() => setActiveTab('documentos')}>
-          📄 Documentos ({docsUploaded})
+          <FileText size={16} /> Documentos ({docsUploaded})
         </button>
         <button className={`tab ${activeTab === 'validacao' ? 'active' : ''}`} onClick={() => setActiveTab('validacao')}>
-          🤖 Validação IA
+          <Bot size={16} /> Validação IA
         </button>
       </div>
 
@@ -265,7 +272,7 @@ export default function CandidateDetail() {
         <div className="animate-slideUp">
           {/* Personal Info */}
           <div className="detail-section">
-            <h3 className="detail-section-title">👤 Dados Pessoais</h3>
+            <h3 className="detail-section-title flex items-center gap-2"><User size={20} className="text-primary-400" /> Dados Pessoais</h3>
             <div className="detail-grid">
               <div className="detail-item">
                 <span className="detail-label">Nome Completo</span>
@@ -293,7 +300,7 @@ export default function CandidateDetail() {
           {/* Form Answers */}
           {candidate.fichas_cadastrais ? (
             <div className="detail-section">
-              <h3 className="detail-section-title">📝 Respostas da Ficha Pré-Cadastral</h3>
+              <h3 className="detail-section-title flex items-center gap-2"><FileEdit size={20} className="text-primary-400" /> Respostas da Ficha Pré-Cadastral</h3>
               <div className="detail-grid">
                 {Object.entries(candidate.fichas_cadastrais)
                   .filter(([key]) => key !== 'candidato_id')
@@ -324,7 +331,7 @@ export default function CandidateDetail() {
               {/* Alerts */}
               {candidate.fichas_cadastrais.tem_imovel && (
                 <div className="alert alert-warning" style={{ marginTop: '16px' }}>
-                  <span className="alert-icon">⚠️</span>
+                  <span className="alert-icon"><AlertTriangle size={20} /></span>
                   <div>
                     <strong>Atenção:</strong> Candidato declarou possuir imóvel em seu nome neste instante.
                   </div>
@@ -332,7 +339,7 @@ export default function CandidateDetail() {
               )}
               {candidate.fichas_cadastrais.financiamento_habitacional_pos_2005 && (
                 <div className="alert alert-error" style={{ marginTop: '16px' }}>
-                  <span className="alert-icon">🚫</span>
+                  <span className="alert-icon"><Ban size={20} /></span>
                   <div>
                     <strong>Subsídio Bloqueado:</strong> Candidato recebeu benefício habitacional após 16/05/2005. Processo pode continuar sem subsídio.
                   </div>
@@ -340,7 +347,7 @@ export default function CandidateDetail() {
               )}
               {candidate.fichas_cadastrais.tipo_renda === 'Sem_renda' && (
                 <div className="alert alert-error" style={{ marginTop: '16px' }}>
-                  <span className="alert-icon">💰</span>
+                  <span className="alert-icon"><Wallet size={20} /></span>
                   <div>
                     <strong>Sem Renda Comprovável:</strong> Candidato declarou não possuir renda alguma. (Avaliar reprovação)
                   </div>
@@ -349,7 +356,7 @@ export default function CandidateDetail() {
 
               {/* Narrative */}
               <div style={{ marginTop: '24px' }}>
-                <h3 className="detail-section-title">📖 Narrativa sobre Atividade e Renda</h3>
+                <h3 className="detail-section-title flex items-center gap-2"><BookOpen size={20} className="text-primary-400" /> Narrativa sobre Atividade e Renda</h3>
                 <div
                   className="card"
                   style={{
@@ -365,14 +372,14 @@ export default function CandidateDetail() {
             </div>
           ) : (
             <div className="alert alert-warning">
-              <span className="alert-icon">📋</span>
+              <span className="alert-icon"><FileWarning size={20} /></span>
               <div>Ficha pré-cadastral ainda não foi preenchida por este candidato.</div>
             </div>
           )}
 
           {/* Analyst observations */}
           <div className="detail-section">
-            <h3 className="detail-section-title">🗒️ Observações do Analista</h3>
+            <h3 className="detail-section-title flex items-center gap-2"><FileEdit size={20} className="text-primary-400" /> Observações do Analista</h3>
             <div className="form-group">
               <textarea
                 className="form-textarea"
@@ -387,7 +394,7 @@ export default function CandidateDetail() {
                 onClick={handleSaveObservations}
                 disabled={saving}
               >
-                {saving ? 'Salvando...' : '💾 Salvar Observações'}
+                {saving ? 'Salvando...' : <><Check size={16} /> Salvar Observações</>}
               </button>
             </div>
           </div>
@@ -399,7 +406,7 @@ export default function CandidateDetail() {
           {/* Missing documents alert */}
           {docsMissing.length > 0 && (
             <div className="alert alert-warning" style={{ marginBottom: '20px' }}>
-              <span className="alert-icon">📋</span>
+              <span className="alert-icon"><FileWarning size={20} /></span>
               <div>
                 <strong>Documentos faltantes ({docsMissing.length}):</strong>{' '}
                 {docsMissing.map((dt) => getDocumentName(dt)).join(', ')}
@@ -432,25 +439,25 @@ export default function CandidateDetail() {
                     <span className="doc-card-title">{getDocumentName(docType)}</span>
                     {doc ? (
                       <span
-                        className="doc-card-status"
+                        className="doc-card-status flex items-center gap-1"
                         style={{ color: statusColorMap[doc.status_upload], fontWeight: 600 }}
                       >
-                        {doc.status_upload === 'Aprovado' && '✅ Aprovado'}
-                        {doc.status_upload === 'Rejeitado' && '❌ Rejeitado'}
-                        {doc.status_upload === 'Enviado' && '📤 Enviado'}
-                        {doc.status_upload === 'Pendente' && '⏸ Pendente'}
+                        {doc.status_upload === 'Aprovado' && <><CheckCircle size={14} /> Aprovado</>}
+                        {doc.status_upload === 'Rejeitado' && <><XCircle size={14} /> Rejeitado</>}
+                        {doc.status_upload === 'Enviado' && <><CheckCircle size={14} /> Enviado</>}
+                        {doc.status_upload === 'Pendente' && <><AlertTriangle size={14} /> Pendente</>}
                       </span>
                     ) : (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        ❌ Não enviado
+                      <span className="flex items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        <XCircle size={12} /> Não enviado
                       </span>
                     )}
                   </div>
 
                   {doc ? (
                     <div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                        📎 {doc.arquivo_original_nome || 'Arquivo'} 
+                      <div className="flex items-center gap-2" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                        <Paperclip size={14} /> {doc.arquivo_original_nome || 'Arquivo'} 
                       </div>
 
                       {doc.status_ia !== 'Pendente' && (
@@ -470,21 +477,21 @@ export default function CandidateDetail() {
                           className="btn btn-outline btn-sm"
                           onClick={() => setSelectedDocUrl(doc.arquivo_url)}
                         >
-                          👁️ Ver 
+                          <Eye size={14} /> Ver 
                         </button>
                         <button
                           className="btn btn-success btn-sm"
                           onClick={() => handleDocAction(doc, 'Aprovado')}
                           disabled={doc.status_upload === 'Aprovado'}
                         >
-                          ✅ 
+                          <Check size={14} /> 
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => setRejectingDocId(doc.id!)}
                           disabled={doc.status_upload === 'Rejeitado'}
                         >
-                          ❌ 
+                          <X size={14} /> 
                         </button>
                       </div>
                       {doc.motivo_rejeicao && doc.status_upload === 'Rejeitado' && (
@@ -508,7 +515,7 @@ export default function CandidateDetail() {
       {activeTab === 'validacao' && (
         <div className="animate-slideUp">
           <div className="alert alert-info" style={{ marginBottom: '20px' }}>
-            <span className="alert-icon">🤖</span>
+            <span className="alert-icon"><Bot size={20} /></span>
             <div>
               A validação por IA analisa automaticamente a qualidade, extrai dados via OCR e verifica prazos de validade.
             </div>
@@ -516,7 +523,9 @@ export default function CandidateDetail() {
 
           {documentos.filter((d) => d.status_ia && d.status_ia !== 'Pendente').length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">🤖</div>
+              <div style={{ color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+                <Bot size={48} strokeWidth={1} />
+              </div>
               <div className="empty-state-title">Nenhuma validação de IA concluída</div>
             </div>
           ) : (
@@ -532,6 +541,7 @@ export default function CandidateDetail() {
                         </h4>
                       </div>
                       <div
+                        className="flex items-center gap-1"
                         style={{
                           padding: '4px 12px',
                           borderRadius: '999px',
@@ -543,7 +553,7 @@ export default function CandidateDetail() {
                           color: doc.status_ia === 'Aprovado' ? 'var(--success-500)' : 'var(--danger-500)',
                         }}
                       >
-                        {doc.status_ia === 'Aprovado' ? '✅ IA Válido' : '❌ IA Rejeitado'}
+                        {doc.status_ia === 'Aprovado' ? <><CheckCircle size={14} /> IA Válido</> : <><XCircle size={14} /> IA Rejeitado</>}
                       </div>
                     </div>
 

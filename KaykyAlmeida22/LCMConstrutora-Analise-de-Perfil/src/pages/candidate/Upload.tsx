@@ -6,6 +6,10 @@ import { getRequiredDocuments, getDocumentName } from '../../services/documentRu
 import type { Candidate, DocumentType, Document } from '../../types';
 import ConfidenceMeter from '../../components/shared/ConfidenceMeter';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import { 
+  Building2, XCircle, FileText, Camera, UploadCloud, 
+  CheckCircle, Paperclip, RefreshCw, PartyPopper 
+} from 'lucide-react';
 
 export default function Upload() {
   const [searchParams] = useSearchParams();
@@ -126,10 +130,12 @@ export default function Upload() {
   if (loading) return <LoadingSpinner size="lg" />;
   if (!candidate) {
     return (
-      <div className="empty-state" style={{ minHeight: '100vh' }}>
-        <div className="empty-state-icon">❌</div>
+      <div className="empty-state" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: 'var(--bg-primary)' }}>
+        <div style={{ color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+          <XCircle size={48} strokeWidth={1} />
+        </div>
         <div className="empty-state-title">Candidato não encontrado</div>
-        <button className="btn btn-primary" onClick={() => navigate('/')}>
+        <button className="btn btn-primary" onClick={() => navigate('/')} style={{ marginTop: '24px' }}>
           Voltar ao Início
         </button>
       </div>
@@ -147,8 +153,16 @@ export default function Upload() {
   const missingDocs = reqList.filter((dt) => !uploadedTypes.includes(dt));
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '24px' }}>
-      <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '32px 24px', position: 'relative', overflow: 'hidden' }}>
+      
+      {/* Background Glow */}
+      <div style={{
+         position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100vw', height: '40vh',
+         background: 'radial-gradient(ellipse at top, rgba(59, 130, 246, 0.1) 0%, rgba(0,0,0,0) 70%)',
+         zIndex: 0, pointerEvents: 'none'
+      }} />
+
+      <div style={{ maxWidth: '780px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
         {/* Hidden file input */}
         <input
           ref={fileInputRef}
@@ -159,47 +173,46 @@ export default function Upload() {
         />
 
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <div className="animate-slideDown" style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div
             style={{
               width: 56,
               height: 56,
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, var(--primary-500), var(--primary-700))',
+              borderRadius: '16px',
+              background: 'linear-gradient(135deg, var(--primary-600), var(--primary-800))',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.3rem',
-              fontWeight: 800,
               color: 'white',
-              marginBottom: '16px',
-              boxShadow: '0 4px 16px rgba(59, 130, 246, 0.3)',
+              marginBottom: '20px',
+              boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4), inset 0 1px 1px rgba(255,255,255,0.2)',
+              border: '1px solid rgba(255,255,255,0.1)'
             }}
           >
-            LCM
+            <Building2 size={28} strokeWidth={1.5} />
           </div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '4px' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em' }}>
             Envio de Documentos
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            {candidate.nome_completo} — CPF: {candidate.cpf}
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+            <strong>{candidate.nome_completo}</strong> — CPF: {candidate.cpf}
           </p>
         </div>
 
         {/* Progress */}
-        <div className="card" style={{ marginBottom: '24px', background: 'rgba(59, 130, 246, 0.06)', borderColor: 'rgba(59, 130, 246, 0.15)' }}>
-          <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              📄 Progresso dos Documentos
+        <div className="card animate-slideUp" style={{ marginBottom: '24px', background: 'rgba(59, 130, 246, 0.05)', borderColor: 'rgba(59, 130, 246, 0.15)' }}>
+          <div className="flex justify-between items-center" style={{ marginBottom: '12px' }}>
+            <span className="flex items-center gap-2" style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+              <FileText size={18} className="text-primary-400" /> Progresso dos Documentos
             </span>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary-400)' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-400)' }}>
               {documentos.length}/{reqList.length}
             </span>
           </div>
           <div
             style={{
               width: '100%',
-              height: '8px',
+              height: '6px',
               background: 'var(--bg-tertiary)',
               borderRadius: '999px',
               overflow: 'hidden',
@@ -211,16 +224,18 @@ export default function Upload() {
                 height: '100%',
                 background: 'linear-gradient(90deg, var(--primary-600), var(--success-500))',
                 borderRadius: '999px',
-                transition: 'width 0.5s ease',
+                transition: 'width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
               }}
             />
           </div>
         </div>
 
         {/* Photo Tips */}
-        <div className="photo-tips" style={{ marginBottom: '24px' }}>
-          <div className="photo-tips-title">📸 Dicas para uma boa foto do documento</div>
-          <ul className="photo-tips-list" style={{ fontSize: '0.85rem' }}>
+        <div className="photo-tips animate-slideUp" style={{ marginBottom: '32px' }}>
+          <div className="photo-tips-title flex items-center gap-2">
+            <Camera size={18} /> Dicas para uma boa foto do documento
+          </div>
+          <ul className="photo-tips-list" style={{ fontSize: '0.88rem', lineHeight: 1.6 }}>
             <li>Coloque o documento sobre uma superfície plana e escura</li>
             <li>Tire a foto com boa iluminação, sem sombras</li>
             <li>Enquadre todo o documento na tela, sem cortar bordas</li>
@@ -230,9 +245,9 @@ export default function Upload() {
 
         {/* Pending documents to upload */}
         {missingDocs.length > 0 && (
-          <div style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
-              📋 Documentos Pendentes
+          <div className="animate-slideUp" style={{ marginBottom: '32px' }}>
+            <h2 className="flex items-center gap-2" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '20px' }}>
+              <FileText size={20} className="text-primary-400" /> Documentos Pendentes
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
               {missingDocs.map((docType) => (
@@ -257,7 +272,7 @@ export default function Upload() {
                   {uploadingDocType === docType ? (
                       <div className="spinner" style={{ width: 20, height: 20 }} />
                   ) : (
-                      <button className="btn btn-primary btn-sm">📤</button>
+                      <button className="btn btn-primary btn-sm flex items-center justify-center p-2"><UploadCloud size={16} /></button>
                   )}
                 </div>
               ))}
@@ -267,9 +282,9 @@ export default function Upload() {
 
         {/* Sent documents */}
         {documentos.length > 0 && (
-          <div style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
-              ✅ Documentos Enviados
+          <div className="animate-slideUp" style={{ marginBottom: '32px' }}>
+            <h2 className="flex items-center gap-2" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '20px' }}>
+              <CheckCircle size={20} className="text-success-500" /> Documentos Enviados
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {documentos.map((doc) => (
@@ -290,6 +305,7 @@ export default function Upload() {
                     </div>
                     <span
                       style={{
+                        display: 'flex', alignItems: 'center', gap: '4px',
                         fontSize: '0.78rem',
                         fontWeight: 600,
                         color:
@@ -298,14 +314,14 @@ export default function Upload() {
                           'var(--primary-400)',
                       }}
                     >
-                      {doc.status_upload === 'Enviado' && '📤 Enviado'}
-                      {doc.status_upload === 'Aprovado' && '✅ Aprovado'}
-                      {doc.status_upload === 'Rejeitado' && '❌ Rejeitado — Reenvie'}
+                      {doc.status_upload === 'Enviado' && <><UploadCloud size={14} /> Enviado</>}
+                      {doc.status_upload === 'Aprovado' && <><CheckCircle size={14} /> Aprovado</>}
+                      {doc.status_upload === 'Rejeitado' && <><XCircle size={14} /> Rejeitado — Reenvie</>}
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                    📎 {doc.arquivo_original_nome || 'Arquivo'} 
+                  <div className="flex items-center gap-2" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    <Paperclip size={14} /> {doc.arquivo_original_nome || 'Arquivo'} 
                   </div>
 
                   {doc.status_ia !== 'Pendente' && (
@@ -319,11 +335,11 @@ export default function Upload() {
                       
                       {doc.status_upload === 'Rejeitado' && (
                         <button
-                          className="btn btn-outline btn-sm"
+                          className="btn btn-outline btn-sm flex items-center gap-2"
                           style={{ marginTop: '8px' }}
                           onClick={() => handleUploadClick(doc.tipo_documento as DocumentType)}
                         >
-                          🔄 Reenviar documento
+                          <RefreshCw size={14} /> Reenviar documento
                         </button>
                       )}
                     </div>
@@ -336,8 +352,10 @@ export default function Upload() {
 
         {/* All done */}
         {missingDocs.length === 0 && documentos.length > 0 && (
-          <div className="card" style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.06)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎉</div>
+          <div className="card animate-slideUp" style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.06)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
+            <div style={{ color: 'var(--success-500)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+              <PartyPopper size={48} strokeWidth={1.5} />
+            </div>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '4px' }}>
               Todos os documentos foram enviados!
             </h3>

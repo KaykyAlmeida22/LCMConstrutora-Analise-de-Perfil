@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { LayoutDashboard, Users, UserPlus, Home, Menu, Building2 } from 'lucide-react';
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,7 +53,7 @@ export default function AdminLayout() {
                 color: 'white',
               }}
             >
-              LCM
+              <Building2 size={20} />
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'white' }}>MCMV Cidades</div>
@@ -71,7 +72,7 @@ export default function AdminLayout() {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             onClick={() => setSidebarOpen(false)}
           >
-            <span className="sidebar-link-icon">📊</span>
+            <LayoutDashboard size={18} className="sidebar-link-icon" />
             Dashboard Geral
           </NavLink>
           <NavLink
@@ -79,7 +80,7 @@ export default function AdminLayout() {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             onClick={() => setSidebarOpen(false)}
           >
-            <span className="sidebar-link-icon">👥</span>
+            <Users size={18} className="sidebar-link-icon" />
             Candidatos
           </NavLink>
           <NavLink
@@ -87,7 +88,7 @@ export default function AdminLayout() {
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             onClick={() => setSidebarOpen(false)}
           >
-            <span className="sidebar-link-icon">➕</span>
+            <UserPlus size={18} className="sidebar-link-icon" />
             Novo Cadastro
           </NavLink>
 
@@ -98,7 +99,7 @@ export default function AdminLayout() {
             className="sidebar-link"
             style={{ opacity: 0.7 }}
           >
-            <span className="sidebar-link-icon">🏠</span>
+            <Home size={18} className="sidebar-link-icon" />
             Área do Candidato
           </NavLink>
         </nav>
@@ -155,7 +156,7 @@ export default function AdminLayout() {
             style={{ display: 'none' }}
             id="mobile-menu-btn"
           >
-            ☰
+            <Menu size={20} />
           </button>
           <div className="main-header-title" id="page-title" />
           <div className="flex items-center gap-3">

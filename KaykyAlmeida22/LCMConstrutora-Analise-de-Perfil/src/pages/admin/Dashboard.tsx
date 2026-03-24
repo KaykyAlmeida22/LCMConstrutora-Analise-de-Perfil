@@ -7,6 +7,10 @@ import StatusBadge from '../../components/shared/StatusBadge';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { supabase } from '../../lib/supabase';
 import { getRequiredDocuments } from '../../services/documentRules';
+import { 
+  FileText, Search, AlertTriangle, CheckCircle, Ban, Wallet, 
+  Users, Plus, FolderOpen 
+} from 'lucide-react';
 
 export default function Dashboard() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -58,13 +62,13 @@ export default function Dashboard() {
 
   if (loading) return <LoadingSpinner size="lg" />;
 
-  const statCards: { key: CandidateStatus; icon: string }[] = [
-    { key: 'documentacao_pendente', icon: '📄' },
-    { key: 'em_analise', icon: '🔍' },
-    { key: 'aguardando_correcao', icon: '⚠️' },
-    { key: 'aprovado', icon: '✅' },
-    { key: 'subsidio_bloqueado', icon: '🚫' },
-    { key: 'sem_renda_comprovavel', icon: '💰' },
+  const statCards: { key: CandidateStatus; icon: React.ReactNode }[] = [
+    { key: 'documentacao_pendente', icon: <FileText size={24} /> },
+    { key: 'em_analise', icon: <Search size={24} /> },
+    { key: 'aguardando_correcao', icon: <AlertTriangle size={24} /> },
+    { key: 'aprovado', icon: <CheckCircle size={24} /> },
+    { key: 'subsidio_bloqueado', icon: <Ban size={24} /> },
+    { key: 'sem_renda_comprovavel', icon: <Wallet size={24} /> },
   ];
 
   const totalCandidates = candidates.length;
@@ -88,11 +92,12 @@ export default function Dashboard() {
           <div
             className="stat-icon"
             style={{
-              background: 'linear-gradient(135deg, var(--primary-600), var(--primary-400))',
+              background: 'linear-gradient(135deg, var(--primary-600), var(--primary-700))',
               color: 'white',
+              boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.1)'
             }}
           >
-            👥
+            <Users size={24} />
           </div>
           <div>
             <div className="stat-value" style={{ color: 'var(--primary-400)' }}>
@@ -140,7 +145,7 @@ export default function Dashboard() {
             alignItems: 'center'
           }}
         >
-          <span style={{ position: 'absolute', left: '16px', color: 'var(--text-muted)' }}>🔍</span>
+          <span style={{ position: 'absolute', left: '16px', color: 'var(--text-muted)' }}><Search size={18} /></span>
           <input
             className="form-input"
             style={{
@@ -182,7 +187,7 @@ export default function Dashboard() {
             onClick={() => navigate('/admin/novo-candidato')}
             id="btn-new-candidate"
           >
-            ＋ Novo Candidato
+            <Plus size={18} /> Novo Candidato
           </button>
         </div>
       </div>
@@ -204,13 +209,17 @@ export default function Dashboard() {
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={6}>
-                  <div className="empty-state" style={{ padding: '48px 24px' }}>
-                    <div className="empty-state-icon">📂</div>
-                    <div className="empty-state-title">Nenhum candidato encontrado</div>
-                    <div className="empty-state-text">
+                  <div className="empty-state" style={{ padding: '64px 24px', textAlign: 'center' }}>
+                    <div style={{ color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+                      <FolderOpen size={48} strokeWidth={1} />
+                    </div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                      Nenhum candidato encontrado
+                    </div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                       {search || statusFilter
-                        ? 'Tente alterar os filtros de busca.'
-                        : 'Clique em "Novo Candidato" para começar.'}
+                        ? 'Tente alterar os filtros de busca para encontrar o que procura.'
+                        : 'Clique no botão "Novo Candidato" ali em cima para começar.'}
                     </div>
                   </div>
                 </td>
