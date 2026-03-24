@@ -1,7 +1,7 @@
 -- =========================================================================
 -- LCM Minha Casa Minha Vida Cidades - Schema V1 Completo
 -- Destinado para execução no SQL Editor do Supabase
--- Autor: Plataforma LCM
+-- Autor: Kayky Almeida
 -- Data: Março 2026
 -- =========================================================================
 
