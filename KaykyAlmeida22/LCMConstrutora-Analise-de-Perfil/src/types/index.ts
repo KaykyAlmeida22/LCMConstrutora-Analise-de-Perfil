@@ -112,3 +112,28 @@ export interface Candidate {
   documentos?: Document[];
   dependentes?: Dependent[];
 }
+
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+export interface FormField {
+  id: keyof FormAnswers;
+  label: string;
+  type: 'text' | 'number' | 'email' | 'select' | 'boolean' | 'date';
+  required?: boolean;
+  options?: SelectOption[];
+  helpText?: string;
+  conditionalOn?: {
+    field: keyof FormAnswers;
+    value: any;
+  };
+}
+
+export interface FormStep {
+  id: string;
+  title: string;
+  description: string;
+  questions: FormField[];
+}
