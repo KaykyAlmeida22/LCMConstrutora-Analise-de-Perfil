@@ -135,5 +135,30 @@ export interface FormStep {
   id: string;
   title: string;
   description: string;
-  questions: FormField[];
 }
+
+export type CandidateStatus = 
+  | 'documentacao_pendente'
+  | 'em_analise'
+  | 'aguardando_correcao'
+  | 'aprovado'
+  | 'subsidio_bloqueado'
+  | 'sem_renda_comprovavel';
+
+export const STATUS_LABELS: Record<CandidateStatus, string> = {
+  documentacao_pendente: 'Doc. Pendente',
+  em_analise: 'Em Análise',
+  aguardando_correcao: 'Ag. Correção',
+  aprovado: 'Aprovado',
+  subsidio_bloqueado: 'Subsídio Bloq.',
+  sem_renda_comprovavel: 'Sem Renda',
+};
+
+export const STATUS_COLORS: Record<CandidateStatus, string> = {
+  documentacao_pendente: '#eab308',
+  em_analise: '#3b82f6',
+  aguardando_correcao: '#f97316',
+  aprovado: '#10b981',
+  subsidio_bloqueado: '#ef4444',
+  sem_renda_comprovavel: '#991b1b',
+};

@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../../services/mockDatabase';
+import { api } from '../../services/api';
 import { STATUS_LABELS, STATUS_COLORS } from '../../types';
 import type { Candidate, CandidateStatus } from '../../types';
 import StatusBadge from '../../components/shared/StatusBadge';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import { getRequiredDocuments } from '../../services/documentRules';
 
 export default function Dashboard() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [stats, setStats] = useState<Record<CandidateStatus, number> | null>(null);
+  const [stats, setStats] = useState<Record<string, number> | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CandidateStatus | ''>('');
@@ -21,8 +22,8 @@ export default function Dashboard() {
   async function loadData() {
     setLoading(true);
     const [candidateList, statsData] = await Promise.all([
-      db.getCandidates(),
-      db.getStats(),
+      api.getCandidates(),
+      api.getStats(),
     ]);
     setCandidates(candidateList);
     setStats(statsData);
@@ -32,7 +33,7 @@ export default function Dashboard() {
   const filtered = candidates.filter((c) => {
     const matchSearch =
       !search ||
-      c.nome.toLowerCase().includes(search.toLowerCase()) ||
+      c.nome_completo.toLowerCase().includes(search.toLowerCase()) ||
       c.cpf.includes(search);
     const matchStatus = !statusFilter || c.status === statusFilter;
     return matchSearch && matchStatus;
@@ -171,8 +172,10 @@ export default function Dashboard() {
               </tr>
             ) : (
               filtered.map((c) => {
-                const docsUploaded = c.documents.length;
-                const docsRequired = c.requiredDocuments.length;
+                const reqList = c.fichas_cadastrais ? getRequiredDocuments(c.fichas_cadastrais, c) : [];
+                const docsRequired = reqList.length;
+                const docsUploaded = (c.documentos || []).length;
+                
                 return (
                   <tr
                     key={c.id}
@@ -186,28 +189,28 @@ export default function Dashboard() {
                             width: 38,
                             height: 38,
                             borderRadius: '50%',
-                            background: `linear-gradient(135deg, ${STATUS_COLORS[c.status]}40, ${STATUS_COLORS[c.status]}15)`,
+                            background: `linear-gradient(135deg, ${STATUS_COLORS[c.status as CandidateStatus]}40, ${STATUS_COLORS[c.status as CandidateStatus]}15)`,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '0.85rem',
                             fontWeight: 700,
-                            color: STATUS_COLORS[c.status],
+                            color: STATUS_COLORS[c.status as CandidateStatus],
                             flexShrink: 0,
                           }}
                         >
-                          {c.nome.charAt(0)}
+                          {c.nome_completo.charAt(0)}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{c.nome}</div>
+                          <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{c.nome_completo}</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            {c.telefone || c.email}
+                            {c.telefone}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{c.cpf}</td>
-                    <td><StatusBadge status={c.status} /></td>
+                    <td><StatusBadge status={c.status as CandidateStatus} /></td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div
@@ -221,9 +224,9 @@ export default function Dashboard() {
                         >
                           <div
                             style={{
-                              width: docsRequired > 0 ? `${(docsUploaded / docsRequired) * 100}%` : '0%',
+                              width: docsRequired > 0 ? `${Math.min((docsUploaded / docsRequired) * 100, 100)}%` : '0%',
                               height: '100%',
-                              background: docsUploaded === docsRequired && docsRequired > 0
+                              background: docsUploaded >= docsRequired && docsRequired > 0
                                 ? 'var(--success-500)'
                                 : 'var(--primary-500)',
                               borderRadius: '999px',
@@ -237,7 +240,7 @@ export default function Dashboard() {
                       </div>
                     </td>
                     <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      {new Date(c.updatedAt).toLocaleDateString('pt-BR')}
+                      {new Date(c.updated_at).toLocaleDateString('pt-BR')}
                     </td>
                     <td>
                       <button
