@@ -36,7 +36,11 @@ export default function Landing() {
       const candidate = candidates.find((c) => c.cpf.replace(/\D/g, '') === cleanCpf);
       
       if (candidate) {
-        if (!candidate.fichas_cadastrais) {
+        const hasFicha = Array.isArray(candidate.fichas_cadastrais) 
+            ? candidate.fichas_cadastrais.length > 0
+            : !!candidate.fichas_cadastrais;
+            
+        if (!hasFicha) {
           navigate(`/onboarding?id=${candidate.id}`);
         } else {
           navigate(`/upload?id=${candidate.id}`);

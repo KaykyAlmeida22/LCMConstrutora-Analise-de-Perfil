@@ -101,7 +101,10 @@ export default function Upload() {
       const freshCandidate = await api.getCandidate(candidate.id);
       if (freshCandidate) {
         const docs = freshCandidate.documentos || [];
-        const reqs = freshCandidate.fichas_cadastrais ? getRequiredDocuments(freshCandidate.fichas_cadastrais) : [];
+        const _freshFichas = Array.isArray(freshCandidate.fichas_cadastrais) 
+            ? freshCandidate.fichas_cadastrais[0] 
+            : freshCandidate.fichas_cadastrais;
+        const reqs = _freshFichas ? getRequiredDocuments(_freshFichas) : [];
         const uploadedTypes = docs.map(d => d.tipo_documento);
         const isComplete = reqs.every(rt => uploadedTypes.includes(rt));
 
@@ -134,7 +137,11 @@ export default function Upload() {
   }
 
   const documentos = candidate.documentos || [];
-  const reqList = candidate.fichas_cadastrais ? getRequiredDocuments(candidate.fichas_cadastrais) : [];
+  const _fichas = Array.isArray(candidate.fichas_cadastrais) 
+      ? candidate.fichas_cadastrais[0] 
+      : candidate.fichas_cadastrais;
+      
+  const reqList = _fichas ? getRequiredDocuments(_fichas) : [];
   
   const uploadedTypes = documentos.map((d) => d.tipo_documento);
   const missingDocs = reqList.filter((dt) => !uploadedTypes.includes(dt));

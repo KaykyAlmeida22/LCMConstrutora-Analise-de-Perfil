@@ -104,12 +104,21 @@ export const api = {
   // === FICHAS CADASTRAIS ===
 
   async saveFormAnswers(id: string, answers: FormAnswers): Promise<Candidate | undefined> {
-    const { dependentes, ...fichaData } = answers;
+    const { dependentes, financiamento_habitacional_pos_2005, ...restFichaData } = answers;
+    
+    // Convert empty strings to null for DATE fields to prevent PostgreSQL syntax errors
+    const sanitizeDate = (val: string | undefined | null) => val === '' ? null : val;
+    const sanitizedFicha = {
+        ...restFichaData,
+        candidato_id: id,
+        data_casamento: sanitizeDate(answers.data_casamento),
+        data_contrato_habitacional: sanitizeDate(answers.data_contrato_habitacional)
+    };
     
     // Save Ficha
     const { error: fichaError } = await supabase
       .from('fichas_cadastrais')
-      .upsert({ candidato_id: id, ...fichaData });
+      .upsert(sanitizedFicha);
 
     if (fichaError) {
       console.error('Error saving form answers:', fichaError);

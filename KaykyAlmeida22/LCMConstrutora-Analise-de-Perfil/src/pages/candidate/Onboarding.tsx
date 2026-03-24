@@ -115,8 +115,14 @@ export default function Onboarding() {
         // Prepare data (ensure numbers are numbers)
         const finalAnswers = { ...answers };
         
-        await api.saveFormAnswers(candidateId, finalAnswers);
+        const result = await api.saveFormAnswers(candidateId, finalAnswers);
         
+        if (!result) {
+            alert('Erro ao salvar as respostas. Por favor, tente novamente.');
+            setSaving(false);
+            return;
+        }
+
         // Update status if it's blocking
         if (finalAnswers.financiamento_habitacional_pos_2005) {
            await api.updateStatus(candidateId, 'subsidio_bloqueado', undefined, 'Benefício Habitacional após 16/05/2005 detectado na ficha.');
