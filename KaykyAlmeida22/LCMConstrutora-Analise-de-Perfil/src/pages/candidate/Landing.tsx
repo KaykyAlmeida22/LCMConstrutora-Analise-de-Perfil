@@ -82,7 +82,7 @@ export default function Landing() {
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Minha Casa Minha Vida</div>
           </div>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin')}>
+        <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin/login')}>
           Acesso Restrito
         </button>
       </header>
