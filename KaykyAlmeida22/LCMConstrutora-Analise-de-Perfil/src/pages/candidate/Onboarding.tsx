@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { formSteps } from '../../data/formSteps';
 import { api } from '../../services/api';
-import type { FormAnswers, FormStep, FormField } from '../../types';
+import type { FormAnswers, FormStep, FormField, Dependent } from '../../types';
 
 const EMPTY_ANSWERS: FormAnswers = {
   tipo_residencia: '',
@@ -92,6 +92,11 @@ export default function Onboarding() {
     const visibleQuestions = step.questions.filter(shouldShowQuestion);
     return visibleQuestions.every((q) => {
       if (!q.required) return true;
+      if (q.type === 'dependentes_array') {
+        const deps = ((answers as any)[q.id] as Dependent[]) || [];
+        if (deps.length === 0) return false;
+        return deps.every(d => d.nome.trim() !== '' && d.idade >= 0 && d.grau_parentesco !== '' && (!d.tem_renda || (d.tem_renda && d.valor_renda !== undefined && d.valor_renda > 0)));
+      }
       const val = (answers as any)[q.id];
       if (val === null || val === undefined || val === '') return false;
       // Basic text validation if needed
@@ -277,6 +282,134 @@ export default function Onboarding() {
                     onChange={(e) => handleAnswer(q.id, e.target.value)}
                     rows={4}
                   />
+                )}
+
+                {q.type === 'dependentes_array' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--bg-tertiary)', padding: '16px', borderRadius: '12px' }}>
+                    {((answers.dependentes as Dependent[]) || []).map((dep, index) => (
+                      <div key={index} className="card-glass" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', border: '1px solid var(--border-default)' }}>
+                        <div className="flex justify-between items-center">
+                          <strong style={{ fontSize: '0.9rem' }}>Dependente {index + 1}</strong>
+                          <button 
+                            type="button" 
+                            className="btn btn-ghost btn-sm" 
+                            style={{ color: 'var(--danger-500)', padding: '4px 8px' }}
+                            onClick={() => {
+                              const newList = [...((answers.dependentes as Dependent[]) || [])];
+                              newList.splice(index, 1);
+                              handleAnswer('dependentes', newList);
+                            }}
+                          >
+                            Remover
+                          </button>
+                        </div>
+                        
+                        <div className="form-group">
+                          <label className="form-label" style={{ fontSize: '0.8rem' }}>Nome Completo *</label>
+                          <input
+                            className="form-input"
+                            value={dep.nome}
+                            onChange={(e) => {
+                              const newList = [...((answers.dependentes as Dependent[]) || [])];
+                              newList[index].nome = e.target.value;
+                              handleAnswer('dependentes', newList);
+                            }}
+                          />
+                        </div>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                          <div className="form-group">
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Idade *</label>
+                            <input
+                              className="form-input"
+                              type="number"
+                              value={dep.idade || ''}
+                              onChange={(e) => {
+                                const newList = [...((answers.dependentes as Dependent[]) || [])];
+                                newList[index].idade = parseInt(e.target.value) || 0;
+                                handleAnswer('dependentes', newList);
+                              }}
+                            />
+                          </div>
+                          
+                          <div className="form-group">
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Parentesco *</label>
+                            <select
+                              className="form-input"
+                              value={dep.grau_parentesco}
+                              onChange={(e) => {
+                                const newList = [...((answers.dependentes as Dependent[]) || [])];
+                                newList[index].grau_parentesco = e.target.value;
+                                handleAnswer('dependentes', newList);
+                              }}
+                            >
+                              <option value="">Selecione...</option>
+                              <option value="Filho_Filha">Filho(a)</option>
+                              <option value="Enteado_Enteada">Enteado(a)</option>
+                              <option value="Menor_Guarda">Menor sob guarda</option>
+                              <option value="Pai_Mae">Pai/Mãe</option>
+                              <option value="Outro">Outro</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label" style={{ fontSize: '0.8rem' }}>Este dependente possui renda?</label>
+                          <div className="toggle-group" style={{ marginBottom: '8px' }}>
+                            <button
+                              type="button"
+                              className={`toggle-btn ${dep.tem_renda === true ? 'selected' : ''}`}
+                              onClick={() => {
+                                const newList = [...((answers.dependentes as Dependent[]) || [])];
+                                newList[index].tem_renda = true;
+                                handleAnswer('dependentes', newList);
+                              }}
+                            >Sim</button>
+                            <button
+                              type="button"
+                              className={`toggle-btn ${dep.tem_renda === false ? 'selected' : ''}`}
+                              onClick={() => {
+                                const newList = [...((answers.dependentes as Dependent[]) || [])];
+                                newList[index].tem_renda = false;
+                                newList[index].valor_renda = 0;
+                                handleAnswer('dependentes', newList);
+                              }}
+                            >Não</button>
+                          </div>
+                        </div>
+
+                        {dep.tem_renda && (
+                          <div className="form-group">
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Qual o valor da mensal (R$)? *</label>
+                            <input
+                              className="form-input"
+                              type="number"
+                              value={dep.valor_renda || ''}
+                              onChange={(e) => {
+                                const newList = [...((answers.dependentes as Dependent[]) || [])];
+                                newList[index].valor_renda = parseFloat(e.target.value) || 0;
+                                handleAnswer('dependentes', newList);
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    
+                    <button 
+                      type="button" 
+                      className="btn btn-outline" 
+                      onClick={() => {
+                        const current = ((answers.dependentes as Dependent[]) || []);
+                        handleAnswer('dependentes', [
+                          ...current, 
+                          { nome: '', idade: 0, grau_parentesco: '', tem_renda: false }
+                        ]);
+                      }}
+                    >
+                      + Adicionar Dependente
+                    </button>
+                  </div>
                 )}
               </div>
             ))}

@@ -113,8 +113,13 @@ export const formSteps: FormStep[] = [
         helpText: 'O dependente precisa ter parentesco e você precisa ser o responsável legal.',
         type: 'boolean',
         required: true,
+      },
+      {
+        id: 'dependentes',
+        label: 'Cadastro de Dependentes',
+        type: 'dependentes_array',
+        conditionalOn: { field: 'tem_dependentes', value: true }
       }
-      // Arrays of dependentes will be handled by a specialized form array component later if tem_dependentes is true.
     ],
   },
   {

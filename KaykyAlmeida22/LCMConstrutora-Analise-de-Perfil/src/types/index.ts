@@ -120,7 +120,7 @@ export interface SelectOption {
 export interface FormField {
   id: keyof FormAnswers;
   label: string;
-  type: 'text' | 'number' | 'email' | 'select' | 'boolean' | 'date';
+  type: 'text' | 'number' | 'email' | 'select' | 'boolean' | 'date' | 'dependentes_array';
   required?: boolean;
   options?: SelectOption[];
   helpText?: string;
