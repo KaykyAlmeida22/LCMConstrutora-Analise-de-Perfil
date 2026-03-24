@@ -42,7 +42,22 @@ export default function Landing() {
           navigate(`/upload?id=${candidate.id}`);
         }
       } else {
-        setError('CPF não encontrado. Se você ainda não tem cadastro, será inserido em breve pela equipe da LCM.');
+        // Here we could implement the self-registration flow
+        // but for now, since you want 'everyone' to be able to do it,
+        // we can create an empty candidate on the fly if not found.
+        const newCandidate = await api.createCandidate({
+           nome_completo: 'Candidato em Preenchimento',
+           cpf: formatCPF(cleanCpf),
+           telefone: '',
+           endereco: '',
+           municipio_projeto: 'Extrema'
+        });
+        
+        if (newCandidate) {
+            navigate(`/onboarding?id=${newCandidate.id}`);
+        } else {
+           setError('Erro ao criar seu cadastro. Tente novamente.');
+        }
       }
     } catch (err) {
       console.error(err);
@@ -142,7 +157,7 @@ export default function Landing() {
               {loading ? 'Consultando...' : 'Entrar Agora →'}
             </button>
             <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Apenas candidatos registrados pela LCM têm acesso.
+              Acesso livre para preenchimento da etapa inicial do Processo MCMV.
             </div>
           </form>
         </div>

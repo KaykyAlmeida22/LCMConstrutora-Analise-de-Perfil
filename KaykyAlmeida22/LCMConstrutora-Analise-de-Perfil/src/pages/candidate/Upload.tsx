@@ -95,6 +95,21 @@ export default function Upload() {
       }
       
       await loadCandidate();
+
+      // NEW: Check if all documents are uploaded after this one
+      // We need to fetch FRESH data because loadCandidate is async
+      const freshCandidate = await api.getCandidate(candidate.id);
+      if (freshCandidate) {
+        const docs = freshCandidate.documentos || [];
+        const reqs = freshCandidate.fichas_cadastrais ? getRequiredDocuments(freshCandidate.fichas_cadastrais) : [];
+        const uploadedTypes = docs.map(d => d.tipo_documento);
+        const isComplete = reqs.every(rt => uploadedTypes.includes(rt));
+
+        if (isComplete && reqs.length > 0 && freshCandidate.status === 'documentacao_pendente') {
+          await api.updateStatus(candidate.id, 'em_analise', undefined, 'Todos os documentos obrigatórios foram enviados pelo candidato.');
+          await loadCandidate();
+        }
+      }
     } catch (err) {
       console.error(err);
       alert('Erro ao enviar documento. Tente novamente.');
