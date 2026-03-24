@@ -59,7 +59,7 @@ export default function Dashboard() {
   if (loading) return <LoadingSpinner size="lg" />;
 
   const statCards: { key: CandidateStatus; icon: string }[] = [
-    { key: 'documentacao_pendente', icon: '📋' },
+    { key: 'documentacao_pendente', icon: '📄' },
     { key: 'em_analise', icon: '🔍' },
     { key: 'aguardando_correcao', icon: '⚠️' },
     { key: 'aprovado', icon: '✅' },
@@ -125,21 +125,40 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Filters */}
+      {/* Filtro e Busca com botão lado a lado (estilo novo) */}
       <div
         className="flex items-center justify-between gap-4"
-        style={{ marginBottom: '20px', flexWrap: 'wrap' }}
+        style={{ marginBottom: '24px', flexWrap: 'wrap' }}
       >
-        <div className="search-input-wrapper">
-          <span className="search-icon">🔍</span>
+        <div 
+          className="search-input-wrapper" 
+          style={{ 
+            flex: 1, 
+            maxWidth: '500px', 
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <span style={{ position: 'absolute', left: '16px', color: 'var(--text-muted)' }}>🔍</span>
           <input
-            className="search-input"
+            className="form-input"
+            style={{
+              paddingLeft: '44px',
+              height: '48px',
+              borderRadius: '12px',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-default)',
+              boxShadow: 'none',
+              fontSize: '0.9rem'
+            }}
             placeholder="Buscar por nome ou CPF..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             id="search-candidates"
           />
         </div>
+
         <div className="flex items-center gap-3">
           {statusFilter && (
             <button
@@ -151,10 +170,19 @@ export default function Dashboard() {
           )}
           <button
             className="btn btn-primary"
+            style={{ 
+              height: '48px', 
+              padding: '0 24px', 
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
+              boxShadow: '0 4px 16px rgba(6, 182, 212, 0.3)',
+              fontSize: '0.95rem',
+              fontWeight: 600
+            }}
             onClick={() => navigate('/admin/novo-candidato')}
             id="btn-new-candidate"
           >
-            ➕ Novo Candidato
+            ＋ Novo Candidato
           </button>
         </div>
       </div>
@@ -263,6 +291,7 @@ export default function Dashboard() {
                     <td>
                       <button
                         className="btn btn-outline btn-sm"
+                        style={{ borderRadius: '99px', fontSize: '0.75rem', padding: '6px 16px', borderColor: 'var(--border-hover)' }}
                         onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/admin/candidato/${c.id}`);

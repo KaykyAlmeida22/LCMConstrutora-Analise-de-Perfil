@@ -29,24 +29,25 @@ export default function AdminLayout() {
           <div
             style={{
               padding: '16px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(29, 78, 216, 0.05))',
-              border: '1px solid rgba(59, 130, 246, 0.1)',
+              borderRadius: '16px',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-default)',
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
             }}
           >
             <div
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: '8px',
-                background: 'linear-gradient(135deg, var(--primary-500), var(--primary-700))',
+                width: 40,
+                height: 40,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, var(--gray-700), var(--gray-600))',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '0.9rem',
+                fontSize: '0.85rem',
                 fontWeight: 800,
                 color: 'white',
               }}
@@ -54,7 +55,7 @@ export default function AdminLayout() {
               LCM
             </div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>MCMV Cidades</div>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'white' }}>MCMV Cidades</div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Módulo Análise</div>
             </div>
           </div>
@@ -129,8 +130,14 @@ export default function AdminLayout() {
             </div>
             
             <button
-              className="btn btn-outline"
-              style={{ width: '100%', borderColor: 'rgba(239, 68, 68, 0.3)', color: 'var(--error-500)', padding: '8px' }}
+              className="btn btn-ghost"
+              style={{ 
+                width: '100%', 
+                background: 'var(--bg-tertiary)', 
+                color: 'var(--text-secondary)',
+                borderRadius: '12px',
+                padding: '10px'
+              }}
               onClick={handleLogout}
             >
               Sair do Sistema

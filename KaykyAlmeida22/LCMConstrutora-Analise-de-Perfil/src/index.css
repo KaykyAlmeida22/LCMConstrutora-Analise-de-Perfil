@@ -54,12 +54,12 @@
   --gray-900: #0f172a;
 
   /* Surfaces */
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --bg-card: rgba(30, 41, 59, 0.7);
-  --bg-glass: rgba(30, 41, 59, 0.5);
-  --bg-hover: rgba(59, 130, 246, 0.08);
+  --bg-primary: #0b1120;
+  --bg-secondary: #121b2b;
+  --bg-tertiary: #1e293b;
+  --bg-card: #182235;
+  --bg-glass: rgba(24, 34, 53, 0.6);
+  --bg-hover: rgba(59, 130, 246, 0.1);
 
   /* Text */
   --text-primary: #f1f5f9;
@@ -68,8 +68,8 @@
   --text-inverse: #0f172a;
 
   /* Borders */
-  --border-default: rgba(148, 163, 184, 0.15);
-  --border-hover: rgba(148, 163, 184, 0.3);
+  --border-default: rgba(148, 163, 184, 0.1);
+  --border-hover: rgba(148, 163, 184, 0.2);
   --border-focus: var(--primary-500);
 
   /* Shadows */
@@ -456,7 +456,7 @@ img { max-width: 100%; }
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.9rem;
@@ -468,8 +468,9 @@ img { max-width: 100%; }
   color: var(--text-primary);
 }
 .sidebar-link.active {
-  background: rgba(59, 130, 246, 0.12);
-  color: var(--primary-400);
+  background: var(--bg-tertiary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 .sidebar-link-icon {
   width: 20px;
@@ -512,8 +513,18 @@ img { max-width: 100%; }
 /* ===== STAT CARDS ===== */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(1, 1fr);
   gap: var(--space-4);
+}
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 .stat-card {
   background: var(--bg-card);
@@ -555,28 +566,29 @@ img { max-width: 100%; }
 .table-container {
   overflow-x: auto;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-default);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 .table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 .table th {
   padding: var(--space-4) var(--space-5);
   text-align: left;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-default);
-  background: rgba(15, 23, 42, 0.4);
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: transparent;
 }
 .table td {
   padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
   font-size: 0.9rem;
   vertical-align: middle;
 }
