@@ -1,0 +1,1493 @@
+PLATAFORMA LCM 
+—
+ 
+MINHA CASA 
+MINHA VIDA
+ 
+Briefing de Produto 
+—
+ 
+V1 (Uso Interno LCM)
+ 
+Baseado na reunião com Gleice Silva (Analista de Crédito 
+—
+ 
+LCM Construtora)
+ 
+Documento de referência para o time de desenvolvimento
+ 
+1. ESCOPO DA V1 
+—
+ 
+O QUE VAMOS CONSTRUIR
+ 
+A versão 1 da plataforma será utilizada exclusivamente pela equipe interna da LCM. O objetivo é 
+digitalizar e organizar o processo de cadastro e coleta de documentos de candidatos ao programa 
+Minha Casa Minha Vida (MCMV), atualmente feito de forma 100% man
+ual pela analista de crédito.
+ 
+ 
+✅
+  
+ESTÁ NO ESCOPO DA V1
+ 
+❌
+  
+FORA DO ESCOPO DA V1
+ 
+Ficha pré
+-
+cadastral (perguntas sim/não)
+ 
+Pesquisa cadastral em lote (CPFs)
+ 
+Coleta e upload de documentos
+ 
+Contato via WhatsApp com candidatos
+ 
+Validação automática dos documentos pela IA
+ 
+Bot / chatbot de atendimento
+ 
+Painel do analista com status por candidato
+ 
+Integração com CV CRM (fase seguinte)
+ 
+Uso restrito: equipe interna LCM
+ 
+Acesso por corretores ou candidatos diretos
+ 
+ 
+2. CONTEXTO DO PROJETO
+ 
+2.1 Programa e público
+-
+alvo
+ 
+•
+ 
+Programa: Minha Casa Minha Vida Cidades 
+—
+ 
+modalidade com subsídio municipal adicional.
+ 
+•
+ 
+Projeto piloto: Prefeitura de Extrema (MG). Próximo município já previsto: Mariana (MG).
+ 
+•
+ 
+Base inicial: ~5.000 pessoas cadastradas pela Prefeitura de Extrema em planilha Excel.
+ 
+•
+ 
+Dados disponíveis na base: nome, CPF, telefone e endereço.
+ 
+•
+ 
+Renda máxima do programa: R$ 8.600,00 por família (teto da faixa local).
+ 
+•
+ 
+Exigência especial: candidato deve comprovar residência no município há mínimo 3 anos.
+ 
+ 
+2.2 Dores que a plataforma resolve
+ 
+•
+ 
+Processo totalmente manual 
+—
+ 
+Gleice valida cada documento individualmente, à mão.
+ 
+•
+ 
+Documentos chegam em péssima qualidade (fotos desfocadas, dedos na frente, JPEG ilegível).
+ 
+•
+ 
+Corretores não sabem quais documentos pedir em cada situação.
+ 
+•
+ 
+Gleice perde muito tempo respondendo dúvidas repetitivas do time comercial.
+ 
+•
+ 
+Sem padrão: cada corretor coleta informações de forma diferente.
+ 
+ 
+ 
+ 
+3. FLUXO DA PLATAFORMA V1
+ 
+O analista interno da LCM opera a plataforma. O fluxo tem duas etapas sequenciais:
+ 
+ 
+ETAPA 1
+ 
+FICHA PRÉ
+-
+CADASTRAL 
+—
+ 
+Perguntas sim/não sobre o perfil do candidato
+ 
+ETAPA 2
+ 
+COLETA DE DOCUMENTOS 
+—
+ 
+Upload condicional baseado nas respostas da 
+Etapa 1
+ 
+RESULTADO
+ 
+PAINEL DO ANALISTA 
+—
+ 
+Revisão, aprovação e gestão de status dos 
+cadastros
+ 
+ 
+4. ETAPA 1 
+—
+ 
+FICHA PRÉ
+-
+CADASTRAL (Perguntas 
+Sim/Não)
+ 
+Esta ficha foi criada pela Gleice para padronizar a coleta de informações do candidato. É baseada no 
+formulário físico que ela usa hoje com corretores. As perguntas são objetivas (sim/não, múltipla 
+escolha) e geram gatilhos condicionais que determinam quai
+s documentos serão solicitados na Etapa 
+2.
+ 
+ 
+FILOSOFIA DA FICHA (Gleice)
+ 
+→
+ 
+Linguagem simples: 'Você tem empréstimo?' e não 'Possui endividamento?'.
+ 
+→
+ 
+Perguntas fechadas (sim/não, seleção de opções) 
+—
+ 
+sem campos de texto livre nesta etapa.
+ 
+→
+ 
+Projetada para o público mais vulnerável: quem tiver mais instrução resolverá facilmente.
+ 
+→
+ 
+A ficha 'induz' a resposta certa 
+—
+ 
+o analista não precisa adivinhar o que perguntar.
+ 
+ 
+ 
+BLOCO 1 
+—
+ 
+Situação de Moradia
+ 
+Pergunta 1 da ficha original:
+ 
+ 
+Pergunta
+ 
+Opções / Regra
+ 
+Sua residência é:
+ 
+Opções: Própria Quitada / Própria Financiada / Alugada / Mora 
+com parentes/pais / Cedida / Outros
+ 
+Se paga aluguel:
+ 
+Campo numérico: qual o valor?
+ 
+Pergunta 2:
+ 
+Já possuiu imóvel e vendeu? A venda foi registrada no Cartório 
+de Registro de Imóveis? (Sim / Não)
+ 
+ 
+REGRA 
+—
+ 
+Imóvel anterior
+ 
+→
+ 
+Quem já teve imóvel e vendeu: verificar se a venda foi registrada em cartório (regularização).
+ 
+→
+ 
+Ter imóvel em nome próprio PODE inviabilizar acesso ao MCMV 
+—
+ 
+verificar normativo da 
+CEF.
+ 
+ 
+ 
+BLOCO 2 
+—
+ 
+Escolaridade
+ 
+Pergunta 3 da ficha original (contexto: ajuda a calibrar a linguagem do atendimento):
+ 
+ 
+Pergunta
+ 
+Opções
+ 
+Escolaridade
+ 
+Opções: Segundo Grau / Superior Incompleto / Pós/MBA / 
+Superior Completo / Mestrado/Doutorado
+ 
+ 
+BLOCO 3 
+—
+ 
+Estado Civil
+ 
+Pergunta 4 da ficha original 
+—
+ 
+principal gatilho para tipo de certidão solicitada:
+ 
+ 
+Condição / Pergunta
+ 
+Documento / Regra
+ 
+Solteiro(a)
+ 
+→ Certidão de Nascimento
+ 
+Casado(a)
+ 
+→ Certidão de Casamento. Campo adicional: data do 
+casamento?
+ 
+Divorciado(a)
+ 
+→ Certidão de Casamento com averbação de divórcio
+ 
+Separado(a) Judicialmente
+ 
+→ Certidão de Casamento com averbação / sentença judicial
+ 
+Comunhão Parcial de Bens
+ 
+→ Certidão de Casamento + Pacto Antenupcial (se aplicável)
+ 
+Comunhão Total de Bens
+ 
+→ Certidão de Casamento (regime consta na certidão)
+ 
+Separação Total
+ 
+→ Certidão de Casamento com pacto de separação total
+ 
+União Estável
+ 
+→ Escritura/Certidão de União Estável
+ 
+Possui Pacto Antenupcial
+ 
+→ Documento do Pacto Antenupcial além da certidão de 
+casamento
+ 
+ 
+DETALHE 
+—
+ 
+Regime de Bens
+ 
+→
+ 
+A ficha original da Gleice inclui os regimes: Comunhão Parcial, Comunhão Total de Bens, 
+Separação Total e Pacto Antenupcial.
+ 
+→
+ 
+Esses regimes impactam como o imóvel será registrado 
+—
+ 
+o sistema deve capturar essa 
+informação.
+ 
+→
+ 
+Em caso de casamento, sempre registrar a data do casamento (campo adicional).
+ 
+ 
+ 
+BLOCO 4 
+—
+ 
+Dependentes
+ 
+Pergunta 5 da ficha original:
+ 
+ 
+Campo
+ 
+Regra / Input
+ 
+Possui dependentes?
+ 
+Sim / Não
+ 
+Se Sim: informar
+ 
+Quantidade e idade de cada dependente
+ 
+O dependente possui renda?
+ 
+Sim / Não + valor (se sim)
+ 
+Grau de parentesco
+ 
+Seleção 
+—
+ 
+deve seguir tabela normativa da CEF (até 3º grau, 
+com responsabilidade legal)
+ 
+ 
+REGRAS 
+—
+ 
+Dependentes
+ 
+→
+ 
+Para a CEF: dependente COM renda NÃO é considerado dependente.
+ 
+→
+ 
+Para o programa social municipal (MCMV Cidades): dependente com renda é aceito, DESDE 
+QUE a soma das rendas não ultrapasse o teto da faixa do programa.
+ 
+→
+ 
+Ser RESPONSÁVEL LEGAL é obrigatório 
+—
+ 
+sobrinha com pai e mãe vivos NÃO pode ser 
+dependente.
+ 
+→
+ 
+Filho acima de 18 anos PODE ser dependente, mas deve aparecer na declaração de IR.
+ 
+→
+ 
+Ter dependentes AUMENTA o subsídio no MCMV Social 
+—
+ 
+é vantagem capturar essa info.
+ 
+→
+ 
+A tabela de graus de parentesco da CEF deve ser implementada como validação.
+ 
+ 
+ 
+BLOCO 5 
+—
+ 
+Financiamentos Existentes
+ 
+ 
+Campo
+ 
+Regra / Input
+ 
+Pergunta 6 
+—
+ 
+Financiamento 
+habitacional
+ 
+Sim / Não. Se Sim: quando foi feito o contrato? ALERTA: 
+Beneficiário de Subsídio a partir de 16/05/2005 não terá mais 
+direito ao subsídio.
+ 
+Pergunta 7 
+—
+ 
+Financiamento 
+estudantil
+ 
+Sim / Não. Se Sim: existe alguma parcela em atraso? (Sim / 
+Não)
+ 
+ 
+ALERTA CRÍTICO 
+—
+ 
+Subsídio Habitacional
+ 
+→
+ 
+Quem já foi beneficiário de subsídio habitacional a partir de 16/05/2005 NÃO tem mais direito 
+ao subsídio do MCMV.
+ 
+→
+ 
+Esta pergunta é eliminatória em relação ao subsídio 
+—
+ 
+o sistema deve emitir alerta vermelho 
+visível ao analista.
+ 
+→
+ 
+Não bloqueia o processo, mas o analista precisa ser informado imediatamente.
+ 
+ 
+ 
+BLOCO 6 
+—
+ 
+Automóvel / Moto
+ 
+ 
+Campo
+ 
+Detalhe
+ 
+Possui automóvel ou moto?
+ 
+Sim / Não
+ 
+Se Sim: valor de mercado 
+(R$)
+ 
+Campo numérico (referência: tabela FIPE)
+ 
+Está financiado?
+ 
+Sim / Não
+ 
+Valor da prestação mensal 
+(R$)
+ 
+Campo numérico
+ 
+Faltam quantas parcelas?
+ 
+Campo numérico
+ 
+ 
+BLOCO 7 
+—
+ 
+Cartão de Crédito
+ 
+ 
+Campo
+ 
+Detalhe
+ 
+Possui cartão de crédito?
+ 
+Sim / Não
+ 
+Se Sim: Bandeira
+ 
+Seleção: Visa / Master / Outros
+ 
+ 
+Uso: para candidatos com renda informal ou mista, o extrato do cartão de crédito pode ser solicitado 
+na Etapa 2 para cruzar com o nível de gastos vs. renda declarada.
+ 
+ 
+BLOCO 8 
+—
+ 
+Imóveis
+ 
+ 
+Campo
+ 
+Detalhe
+ 
+Possui imóvel(s)?
+ 
+Sim / Não
+ 
+Se Sim: valor de mercado 
+(R$)
+ 
+Campo numérico
+ 
+ 
+BLOCO 9 
+—
+ 
+Imposto de Renda e Conta Bancária
+ 
+ 
+Campo
+ 
+Detalhe
+ 
+Pergunta 11 
+—
+ 
+Declara 
+Imposto de Renda?
+ 
+Sim / Não
+ 
+Pergunta 13 
+—
+ 
+Possui conta 
+corrente?
+ 
+Sim / Não. Se Sim: Banco + Limite do cheque especial (R$)
+ 
+ 
+Como verificar se declarou IR: pesquisar CPF no portal de Restituição da Receita Federal (buscar 
+'restituição imposto de renda' no Google e inserir o CPF). Pode ser automatizado via robô na 
+plataforma.
+ 
+ 
+BLOCO 10 
+—
+ 
+Poupança / Aplicação Financeira
+ 
+ 
+Campo
+ 
+Detalhe
+ 
+Pergunta 12 
+—
+ 
+Possui poupança ou 
+outra aplicação financeira?
+ 
+Sim / Não
+ 
+ 
+BLOCO 11 
+—
+ 
+FGTS
+ 
+ 
+Campo
+ 
+Detalhe
+ 
+Pergunta 14 
+—
+ 
+Pelo menos um dos 
+proponentes comprova 36 meses de 
+recolhimento do FGTS?
+ 
+Sim / Não
+ 
+Pergunta 15 
+—
+ 
+Fará uso do FGTS?
+ 
+Sim / Não
+ 
+ 
+FGTS 
+—
+ 
+Informação importante
+ 
+→
+ 
+36 meses de FGTS é requisito para uso do saldo 
+—
+ 
+pelo menos um dos proponentes deve 
+comprovar.
+ 
+→
+ 
+Se fará uso do FGTS: solicitar extrato do FGTS na Etapa 2 de documentos.
+ 
+ 
+ 
+ 
+ 
+5. ETAPA 2 
+—
+ 
+COLETA DE DOCUMENTOS
+ 
+Com base nas respostas da Etapa 1, a plataforma solicita condicionalmente os documentos corretos. 
+Abaixo a lista completa conforme a ficha de checklist da Gleice, com todas as regras detalhadas da 
+reunião.
+ 
+ 
+Documento
+ 
+Condição de Solicitação
+ 
+Regras e Observações
+ 
+IDENTIDADE / CNH
+ 
+TODOS os candidatos 
+(obrigatório)
+ 
+Aceitar RG físico, digital ou CNH. 
+Vencidos são aceitos pela CEF 
+—
+ 
+plataforma emite ALERTA (não 
+bloqueio). O nome deve ser validado 
+contra todos os outros documentos.
+ 
+CPF
+ 
+Quando o RG não contiver 
+o CPF
+ 
+RGs antigos podem não ter o número 
+do CPF 
+—
+ 
+solicitar documento de CPF 
+separado nesse caso.
+ 
+CERTIDÃO DE 
+ESTADO CIVIL
+ 
+TODOS os candidatos 
+(obrigatório)
+ 
+Solteiro → Certidão de Nascimento. 
+Casado → Certidão de Casamento. 
+União Estável → Escritura de União 
+Estável. Divorciado → Certidão com 
+averbação de divórcio.
+ 
+COMPROVANTE DE 
+ENDEREÇO
+ 
+TODOS os candidatos 
+(obrigatório)
+ 
+Emissão máxima: 60 dias. Deve estar 
+no NOME DO CANDIDATO 
+(obrigatório para projetos municipais 
+como Extrema). Tipos aceitos: água, 
+luz, telefone, gás, condomínio.
+ 
+COMPROVANTE DE 
+RESIDÊNCIA (3 anos)
+ 
+Projetos municipais com 
+subsídio local (Extrema, 
+Mariana etc.)
+ 
+Comprovar que mora no município há 
+mínimo 3 anos. Aceitos: conta de 
+concessionária antiga OU extrato 
+bancário de 3 anos OU histórico 
+escolar OU contrato de aluguel com 
+reconhecimento de firma no ano de 
+referência OU declaração de cadastro 
+nas Unidades de S
+aúde OU 
+comprovante de matrícula escolar.
+ 
+CTPS 
+—
+ 
+CARTEIRA 
+DE TRABALHO
+ 
+Renda formal (CLT ou 
+Pró
+-
+Labore)
+ 
+OBRIGATÓRIO ser a versão DIGITAL 
+(app do Governo Federal). Plataforma 
+deve exibir pop
+-
+up/tutorial ensinando 
+como baixar e usar o app da Carteira 
+de Trabalho Digital.
+ 
+CONTRA
+-
+CHEQUE
+ 
+Renda formal (CLT ou 
+Pró
+-
+Labore)
+ 
+Emissão máxima: 60 dias. A IA deve 
+ler e validar a data. Se Pró
+-
+Labore: 
+também solicitar comprovante de 
+recolhimento de imposto do Pró
+-
+Labore.
+ 
+IMPOSTO DE RENDA
+ 
+Candidatos que 
+declararam IR (Bloco 9 da 
+ficha)
+ 
+Solicitar cópia da última declaração. 
+Verificar automaticamente via consulta 
+à Receita Federal (CPF → portal de 
+restituição).
+ 
+EXTRATOS 
+BANCÁRIOS
+ 
+Renda informal, mista, 
+MEI ou Pró
+-
+Labore com 
+renda real diferente do 
+declarado
+ 
+Últimos 6 MESES. TODAS as contas 
+do candidato. Não obrigatório para 
+CLT puro. Finalidade: verificar se 
+gastos condizem com renda declarada.
+ 
+DESPESAS 
+(cartão de 
+crédito / faturas)
+ 
+Renda informal ou mista
+ 
+Últimos 3 meses. Solicitar fatura do 
+cartão de crédito e/ou outras despesas 
+fixas. Serve para cruzar nível de 
+gastos vs. renda declarada e 'construir 
+a narrativa' do candidato.
+ 
+CADASTRO UBER / 99 
+/ IFOOD
+ 
+Candidatos que trabalham 
+com aplicativos de 
+transporte/entrega
+ 
+Solicitar declaração emitida pelo 
+próprio aplicativo. Deve conter: data de 
+ingresso, pontuação/avaliação e média 
+de ganhos mensais. Credibiliza a 
+renda informal.
+ 
+MEI 
+—
+ 
+DOCUMENTOS
+ 
+Candidatos MEI 
+(Microempreendedor 
+Individual)
+ 
+Solicitar: CNPJ + Contrato Social + 
+DAS (guia de recolhimento mensal). 
+Verificar se CNPJ está ativo e se 
+enquadra como MEI. Verificar 
+regularidade do DAS.
+ 
+EXTRATO FGTS
+ 
+Candidatos que marcaram 
+'Sim' para uso do FGTS 
+(Bloco 11)
+ 
+Solicitar extrato do FGTS que 
+comprove mínimo 36 meses de 
+recolhimento por pelo menos um dos 
+proponentes.
+ 
+DOCUMENTOS DO 
+DEPENDENTE
+ 
+Candidatos com 
+dependentes (Bloco 4)
+ 
+Consultar tabela normativa da CEF 
+para verificar grau de parentesco 
+elegível. Solicitar certidão de 
+nascimento do dependente + 
+comprovação de responsabilidade 
+legal. Se dependente tiver renda: 
+informar valor.
+ 
+ 
+5.1 Regras de Upload e Qualidade de Imagem
+ 
+•
+ 
+Aceitar: PDF, JPEG, PNG, foto de celular.
+ 
+•
+ 
+Converter TUDO para PDF antes de salvar no sistema.
+ 
+(iL
+ovePDF)
+ 
+•
+ 
+Se a foto tiver baixa qualidade (borrada, escura, dedo na frente): rejeitar com mensagem amigável 
+e instrução 
+de como refazer.
+ 
+•
+ 
+Pop
+-
+up/tutorial de digitalização: sugerir uso do CamScanner (gratuito) ou da função nativa de scan 
+do celular.
+ 
+•
+ 
+Lógica de qualidade: 'Se você consegue ler bem a foto, eu também consigo' (Gleice).
+ 
+ 
+ORIENTAÇÃO DE UX 
+—
+ 
+Qualidade de Documento
+ 
+→
+ 
+Gleice faz treinamento presencial com corretores ensinando a tirar fotos de documentos 
+—
+ 
+a 
+plataforma deve digitalizar esse treinamento.
+ 
+→
+ 
+Pop
+-
+up ao solicitar cada documento: 'Dica: use o CamScanner ou a função de digitalização 
+do seu celular para uma imagem mais clara.'
+ 
+→
+ 
+Se detectar qualidade ruim: 'Esta imagem está difícil de ler. Por favor, tire uma nova foto com 
+boa iluminação e sem cobrir partes do documento.'
+ 
+ 
+ 
+ 
+ 
+6. VALIDAÇÕES AUTOMÁTICAS DA IA
+ 
+A IA deve realizar as seguintes verificações automaticamente ao receber cada documento:
+ 
+ 
+6.1 Consistência de dados entre documentos
+ 
+Condição / Pergunta
+ 
+Documento / Regra
+ 
+Nome
+ 
+Nome no RG/CNH deve bater com certidão de estado civil, 
+contracheque, comprovante de endereço e todos os demais. 
+Alertar divergência (ex: mulher que casou e mudou de nome).
+ 
+CPF
+ 
+Número do CPF deve ser idêntico em todos os documentos que 
+o contenham.
+ 
+Data de nascimento
+ 
+Verificar consistência entre documentos que contenham a data.
+ 
+Endereço
+ 
+Para projetos municipais: validar que o endereço no 
+comprovante corresponde ao município do programa.
+ 
+ 
+6.2 Validações de prazo
+ 
+Documento
+ 
+Regra de Prazo
+ 
+Comprovante de endereço
+ 
+Data de emissão: máximo 60 dias. BLOQUEANTE 
+—
+ 
+solicitar 
+documento mais recente.
+ 
+Contra
+-
+cheque
+ 
+Data de emissão: máximo 60 dias. BLOQUEANTE 
+—
+ 
+solicitar 
+documento mais recente.
+ 
+Extratos bancários
+ 
+Devem cobrir os últimos 6 meses. BLOQUEANTE se incompleto.
+ 
+RG / CNH vencido
+ 
+ALERTA (não bloqueio) 
+—
+ 
+exibir aviso ao analista, mas não 
+impedir o processo.
+ 
+Carteira de Trabalho
+ 
+Verificar se é a versão digital (não física). ALERTA se for física.
+ 
+ 
+6.3 Validações de legibilidade
+ 
+•
+ 
+Avaliar qualidade mínima da imagem 
+—
+ 
+se ilegível, pedir reenvio.
+ 
+•
+ 
+Informar grau de confiança na leitura (ex: 'Documento lido com 94% de confiança').
+ 
+•
+ 
+Se confiança abaixo de threshold definido: rejeitar automaticamente e pedir novo envio.
+ 
+ 
+7. PAINEL DO ANALISTA (EQUIPE INTERNA LCM)
+ 
+O painel é a interface principal da equipe de crédito da LCM. Deve ser simples, objetivo e funcional.
+ 
+ 
+7.1 Funcionalidades do painel
+ 
+1.
+ 
+Lista de todos os candidatos cadastrados com status visível.
+ 
+2.
+ 
+Filtro por status (ver tabela abaixo).
+ 
+3.
+ 
+Ao clicar em um candidato: ver todas as respostas da ficha + documentos anexados + alertas da 
+IA.
+ 
+4.
+ 
+Visualizar documentos em PDF diretamente no painel (PDF viewer embutido).
+ 
+5.
+ 
+Aprovar ou solicitar correção de documentos individualmente (por documento).
+ 
+6.
+ 
+Campo para o analista adicionar observações/comentários por candidato.
+ 
+7.
+ 
+Botão de aprovação final do cadastro completo.
+ 
+ 
+7.2 Status dos cadastros
+ 
+Status
+ 
+Descrição
+ 
+Documentação Pendente
+ 
+Candidato ainda não enviou todos os documentos. Indicar quais 
+estão faltando.
+ 
+Em Análise
+ 
+Todos os documentos foram enviados 
+—
+ 
+analista está 
+revisando.
+ 
+Aguardando Correção
+ 
+Analista identificou problema e pediu reenvio de documento 
+específico.
+ 
+Aprovado
+ 
+Cadastro completo e aprovado pelo analista.
+ 
+Subsídio Bloqueado
+ 
+Candidato preencheu critérios que impedem o subsídio (ex: 
+financiamento habitacional após 16/05/2005) 
+—
+ 
+processo pode 
+continuar sem subsídio.
+ 
+Sem Renda Comprovável
+ 
+Único critério de reprovação definitiva 
+—
+ 
+candidato não 
+consegue comprovar renda de forma alguma.
+ 
+ 
+REGRA DE REPROVAÇÃO (Gleice)
+ 
+→
+ 
+A ÚNICA forma de desclassificação definitiva é a pessoa não ter renda comprovável.
+ 
+→
+ 
+Ter empréstimo, financiamento de carro, restrição de crédito, carro financiado: NÃO 
+desclassifica.
+ 
+→
+ 
+A CEF é 'banco de todos' 
+—
+ 
+deve analisar todos os casos. O que pode inviabilizar é o 
+comprometimento de renda ser tão alto que a parcela do financiamento não caiba.
+ 
+ 
+ 
+8. CAMPO DE NARRATIVA 
+—
+ 
+DESCRIÇÃO LIVRE DA 
+ATIVIDADE
+ 
+Gleice sugere fortemente que, ao final da coleta de documentos, haja um campo de texto aberto 
+obrigatório para o candidato (ou o analista, preenchendo em nome dele) descrever a atividade e fonte 
+de renda informal.
+ 
+ 
+Texto sugerido por Gleice:
+ 
+"Estamos quase no final! Faça um breve relato da sua atividade. Exemplo: trabalho como 
+confeiteira em casa, vendo pelos aplicativos X e Y desde 2020, com renda média de R$ X 
+por mês."
+ 
+ 
+•
+ 
+Campo obrigatório para candidatos com renda informal ou mista.
+ 
+•
+ 
+Ajuda o analista a 'contar a história' do candidato ao banco 
+—
+ 
+sem isso, o analista terá que ligar e 
+perguntar de qualquer forma.
+ 
+•
+ 
+Gleice: 'Já provei muitas pessoas que contaram uma boa história. Eu sempre tenho que ajudá
+-
+las 
+a contar uma boa história.'
+ 
+•
+ 
+Exemplos de renda que aparecem: confeitaria em casa, loja virtual, aplicativos de entrega, 
+trabalho após o horário de CLT.
+ 
+ 
+ 
+ 
+9. TABELA DE REGRAS CONSOLIDADAS 
+—
+ 
+REFERÊNCIA RÁPIDA
+ 
+ 
+9.1 Documentos por tipo de renda
+ 
+Condição / Pergunta
+ 
+Documento / Regra
+ 
+Renda CLT (formal)
+ 
+Identidade + Certidão estado civil + Comprovante de endereço 
+(60d) + CTPS Digital + Contracheque (60d)
+ 
+Renda Pró
+-
+Labore
+ 
+Idem CLT + Comprovante de recolhimento de imposto do Pró
+-
+Labore + Extrato bancário 6 meses
+ 
+Renda Informal
+ 
+Identidade + Certidão + Comprovante endereço + Extrato 
+bancário 6 meses (todas as contas) + Despesas 3 meses + 
+Campo de narrativa
+ 
+Trabalhador de Aplicativo
+ 
+Idem informal + Declaração do aplicativo (Uber/99/iFood)
+ 
+MEI
+ 
+Idem informal + CNPJ + Contrato Social + DAS
+ 
+Renda Mista
+ 
+Documentos de cada tipo se acumulam
+ 
+Declara IR
+ 
+Acrescentar cópia da declaração de IR
+ 
+Usa FGTS
+ 
+Acrescentar extrato do FGTS (mín. 36 meses)
+ 
+Com Dependente
+ 
+Acrescentar certidão do dependente + comprovação de 
+responsabilidade legal
+ 
+Projeto Municipal (Extrema, 
+Mariana etc.)
+ 
+Acrescentar comprovante de residência de 3 anos atrás 
+(concessionária, extrato bancário, histórico escolar, declaração 
+UBS ou matrícula escolar)
+ 
+ 
+9.2 Prazos de validade 
+—
+ 
+resumo
+ 
+Documento
+ 
+Prazo / Comportamento do sistema
+ 
+Comprovante de endereço
+ 
+Máximo 60 dias da data de emissão 
+—
+ 
+BLOQUEANTE
+ 
+Contracheque
+ 
+Máximo 60 dias da data de emissão 
+—
+ 
+BLOQUEANTE
+ 
+Extratos bancários
+ 
+Últimos 6 meses 
+—
+ 
+BLOQUEANTE se incompleto
+ 
+Despesas / cartão de crédito
+ 
+Últimos 3 meses
+ 
+RG / CNH
+ 
+Sem prazo pela CEF 
+—
+ 
+ALERTA se vencido (não bloqueante)
+ 
+Carteira de Trabalho
+ 
+Deve ser digital 
+—
+ 
+ALERTA se física (não bloqueante)
+ 
+Certidão de estado civil
+ 
+Sem prazo de validade
+ 
+ 
+10. GLOSSÁRIO
+ 
+Termo
+ 
+Significado
+ 
+MCMV
+ 
+Minha Casa Minha Vida 
+—
+ 
+programa habitacional do Governo Federal
+ 
+MCMV Cidades
+ 
+Modalidade com subsídio municipal adicional, exige residência mínima 
+no município
+ 
+CEF / Caixa
+ 
+Caixa Econômica Federal 
+—
+ 
+banco que financia o programa
+ 
+CV CRM
+ 
+Sistema de gestão comercial utilizado pela LCM Construtora 
+(integração prevista para fase futura)
+ 
+Pró
+-
+Labore
+ 
+Remuneração mensal do sócio de empresa. Exige comprovação de 
+recolhimento de imposto.
+ 
+MEI
+ 
+Microempreendedor Individual 
+—
+ 
+CNPJ com regime simplificado de 
+tributação
+ 
+DAS
+ 
+Documento de Arrecadação do Simples 
+—
+ 
+guia mensal de pagamento 
+do MEI
+ 
+Renda Mista
+ 
+Combinação de renda formal (CLT/Pró
+-
+Labore) com renda informal
+ 
+Normativo da Caixa
+ 
+Manual de normas da CEF que regula todos os processos de 
+financiamento MCMV
+ 
+Ficha Pré
+-
+Cadastral
+ 
+Formulário de perguntas sim/não criado por Gleice para padronizar a 
+coleta de perfil do candidato
+ 
+CamScanner
+ 
+App gratuito para digitalizar documentos com qualidade via celular
+ 
+FGTS
+ 
+Fundo de Garantia do Tempo de Serviço 
+—
+ 
+pode ser usado para 
+abater o financiamento
+ 
+Subsídio
+ 
+Desconto concedido pelo governo no valor do imóvel 
+—
+ 
+candidato não 
+pode ter sido beneficiário de subsídio habitacional após 16/05/2005
+ 
+Pesquisa Cadastral
+ 
+Consulta de restrições de crédito (Serasa, SPC, BACEN) do CPF 
+—
+ 
+PREVISTA PARA FASE FUTURA
+ 
+ 
+ 
+ 
+11. PRÓXIMOS PASSOS 
+—
+ 
+ROADMAP PÓS
+-
+V1
+ 
+Funcionalidades fora do escopo da V1, mas planejadas para versões futuras. Organizadas por 
+prioridade de valor para o cliente:
+ 
+ 
+Prio.
+ 
+Funcionalidade
+ 
+Descrição
+ 
+V2
+ 
+Pesquisa Cadastral em 
+Lote (via API)
+ 
+Importar base de CPFs da Prefeitura de Extrema (~5.000 
+pessoas) e rodar consulta automatizada de restrições de 
+crédito (Serasa/SPC/BACEN). Retornar status por CPF 
+(tem restrição: Sim/Não) e salvar resultado. Isso gera 
+enorme valor operacional 
+—
+ 
+hoje é feit
+o manualmente, 
+CPF a CPF.  Sugestão: implementar via API de bureau de 
+crédito (ex: Serasa Experian, Boa Vista). Reduz semanas 
+de trabalho manual para minutos.
+ 
+V2
+ 
+Integração com CV CRM
+ 
+Após aprovação final pelo analista, enviar 
+automaticamente todos os dados e documentos para o CV 
+CRM da LCM. Elimina dupla digitação.
+ 
+V3
+ 
+Acesso por Corretores
+ 
+Abrir a plataforma para corretores inserirem dados dos 
+clientes diretamente. QR Code / link enviável por 
+WhatsApp.
+ 
+V3
+ 
+Acesso Direto pelo 
+Candidato
+ 
+Candidato preenche a ficha e sobe documentos por conta 
+própria via link/QR Code.
+ 
+V4
+ 
+Chatbot WhatsApp
+ 
+Bot para tirar dúvidas dos corretores sobre documentação 
+e regras do MCMV 
+—
+ 
+alivia Gleice de responder perguntas 
+repetitivas.
+ 
+V4
+ 
+Verificação de IR via 
+Receita Federal
+ 
+Automação da consulta ao portal de restituição da Receita 
+para verificar se o candidato declarou IR.
+ 
+ 
+NOTA SOBRE A PESQUISA CADASTRAL 
+—
+ 
+Alto valor, fácil de implementar
+ 
+→
+ 
+A LCM tem 5.000 CPFs cadastrados que precisam de pesquisa cadastral antes do contato 
+comercial.
+ 
+→
+ 
+Hoje isso é feito manualmente 
+—
+ 
+demora semanas.
+ 
+→
+ 
+Uma integração via API de bureau de crédito (ex: Serasa Experian) rodaria isso em minutos.
+ 
+→
+ 
+Resultado esperado por CPF: Tem restrição (Sim/Não) + Valor da restrição + Data.
+ 
+→
+ 
+Quem tem restrição alta: equipe analisa e decide se inviabiliza o negócio antes de gastar 
+tempo com o candidato.
+ 
+→
+ 
+Essa funcionalidade pode ser vendida como add
+-
+on de alto valor para a LCM na V2.
+ 
+ 
+ 
+Briefing gerado a partir da transcrição da reunião POC
+-
+LCM com Gleice Silva e complementado com os prints da Ficha 
+Pré
+-
+Cadastral e Checklist de Documentos.
+ 
+Todas as regras, citações e informações da reunião foram preservadas.
+ 
