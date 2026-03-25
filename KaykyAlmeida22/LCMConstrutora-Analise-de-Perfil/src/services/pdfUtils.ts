@@ -1,8 +1,11 @@
 import { jsPDF } from 'jspdf';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+// Configure PDF.js worker - Using workerPort for better synchronization in Vite
+const worker = new Worker(new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url), {
+  type: 'module',
+});
+pdfjsLib.GlobalWorkerOptions.workerPort = worker;
 
 /**
  * Converts an image file (JPG/PNG) into a single-page PDF blob.

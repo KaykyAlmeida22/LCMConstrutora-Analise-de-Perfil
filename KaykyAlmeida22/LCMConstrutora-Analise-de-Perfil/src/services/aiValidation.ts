@@ -49,7 +49,7 @@ export async function validateDocument(
 
   const docDescription = DOC_TYPE_DESCRIPTIONS[docType] ?? docType;
   const isPdf = options?.isPdf ?? false;
-  const model = isPdf ? 'gpt-5.1' : 'gpt-4o';
+  const model = isPdf ? 'gpt-5.4' : 'gpt-4o';
   // Use base64 data URL if provided (from PDF rendering or image), otherwise use the storage URL
   const imageUrl = options?.imageDataUrl || fileUrl;
 

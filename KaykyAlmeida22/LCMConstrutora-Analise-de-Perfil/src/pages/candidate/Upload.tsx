@@ -66,12 +66,14 @@ export default function Upload() {
       let imageDataUrl: string;
 
       if (isPdf) {
-        // PDF: upload original, render page 1 as image for GPT-5.1
+        // PDF: upload original, render page 1 as image for GPT-5.4
         fileToUpload = file;
         imageDataUrl = await pdfToImage(file);
       } else {
         // Image: convert to PDF for storage, read base64 for GPT-4o
-        fileToUpload = await imageToPdf(file);
+        const pdfBlob = await imageToPdf(file);
+        // Important: Wrap Blob in File so it has a name and type for the uploader
+        fileToUpload = new File([pdfBlob], file.name.replace(/\.[^/.]+$/, "") + ".pdf", { type: 'application/pdf' });
         imageDataUrl = await fileToBase64(file);
       }
 
@@ -147,9 +149,10 @@ export default function Upload() {
           await loadCandidate();
         }
       }
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao enviar documento. Tente novamente.');
+    } catch (err: any) {
+      console.error('Erro detalhado no upload:', err);
+      const msg = err.message || 'Erro desconhecido';
+      alert(`Erro ao enviar documento: ${msg}`);
     } finally {
       setUploadingDocType(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
