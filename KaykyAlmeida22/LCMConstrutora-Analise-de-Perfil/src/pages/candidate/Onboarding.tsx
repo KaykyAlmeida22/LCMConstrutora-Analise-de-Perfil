@@ -187,12 +187,10 @@ export default function Onboarding() {
           ...prev,
           nome_completo: result.data?.nome || prev.nome_completo
         }));
-      } else {
-        alert(result.message || 'CPF não encontrado ou erro na consulta.');
       }
+      // Silently ignore other codes (limit exceeded, etc) to not interrupt the user flow
     } catch (error) {
-      console.error('Erro na consulta capf:', error);
-      alert('Ocorreu um erro ao consultar o CPF.');
+      console.error('Erro na consulta cpf:', error);
     } finally {
       setIsConsultingCpf(false);
     }
