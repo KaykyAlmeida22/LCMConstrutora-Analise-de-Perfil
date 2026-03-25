@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import { BackgroundPaths } from '../../components/ui/BackgroundPaths';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -50,64 +51,18 @@ export default function Login() {
         color: '#1a1a1a', // Adjusting specifically for this bright UI card
       }}
     >
-      {/* Background with blurry office image matching the reference */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: 'url("https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'blur(4px) brightness(1.2)',
-          zIndex: -1,
-        }}
-      />
-      {/* Subtle overlay for better contrast */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundColor: 'rgba(240, 244, 248, 0.4)',
-          zIndex: -1,
-        }}
-      />
+      {/* Animated LCM Background */}
+      <BackgroundPaths />
 
       {/* Top Left Logo */}
       <div
         style={{
           position: 'absolute',
-          top: '24px',
-          left: '32px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
+          top: '32px',
+          left: '40px',
         }}
       >
-        <div
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: '8px',
-            backgroundColor: '#2563eb',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: '1.25rem',
-            letterSpacing: '-0.5px',
-          }}
-        >
-          LCM
-        </div>
-        <div>
-          <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1e293b' }}>
-            LCM Construtora
-          </div>
-          <div style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 500 }}>
-            Minha Casa Minha Vida Cidades
-          </div>
-        </div>
+        <img src="/logo.png" alt="LCM Construtora" style={{ height: '48px', objectFit: 'contain' }} />
       </div>
 
       {/* Login Card */}
@@ -126,12 +81,10 @@ export default function Login() {
       >
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px', lineHeight: 1.2 }}>
-            Acesso à Plataforma de Análise de Crédito LCM
+            Análise de Crédito LCM
           </h1>
           <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: 1.5 }}>
-            Ferramenta interna de gestão de candidatos MCMV Cidades
-            <br />
-            (<strong>Uso Restrito</strong> - Equipe LCM)
+            (<strong>Uso Restrito</strong>)
           </p>
         </div>
 
@@ -214,7 +167,7 @@ export default function Login() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#3b82f6',
+                  color: 'var(--primary-600)',
                   fontSize: '0.85rem',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -267,7 +220,7 @@ export default function Login() {
               marginTop: '12px',
               width: '100%',
               padding: '14px',
-              backgroundColor: '#2563eb',
+              backgroundColor: 'var(--primary-600)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -280,6 +233,7 @@ export default function Login() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
+              boxShadow: '0 4px 12px rgba(140, 198, 63, 0.3)'
             }}
           >
             {loading ? <LoadingSpinner size="sm" /> : 'Acessar Painel do Analista \u2192'}
@@ -295,7 +249,7 @@ export default function Login() {
             href="#"
             style={{
               fontSize: '0.85rem',
-              color: '#3b82f6',
+              color: 'var(--primary-600)',
               textDecoration: 'none',
               display: 'flex',
               alignItems: 'center',

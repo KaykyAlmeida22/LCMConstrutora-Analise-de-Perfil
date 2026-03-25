@@ -90,6 +90,7 @@ export interface FormAnswers {
   tipo_renda?: string;
   faixa_renda?: string;
   trabalha_aplicativo?: boolean;
+  narrativa_renda?: string;
 }
 
 export interface Candidate {
@@ -120,7 +121,7 @@ export interface SelectOption {
 export interface FormField {
   id: keyof FormAnswers;
   label: string;
-  type: 'text' | 'number' | 'email' | 'select' | 'boolean' | 'date' | 'dependentes_array';
+  type: 'text' | 'textarea' | 'number' | 'email' | 'select' | 'boolean' | 'date' | 'dependentes_array';
   required?: boolean;
   options?: SelectOption[];
   helpText?: string;

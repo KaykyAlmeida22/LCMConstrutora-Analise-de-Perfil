@@ -407,7 +407,32 @@ img { max-width: 100%; }
   left: 0;
   bottom: 0;
   z-index: 50;
-  transition: transform var(--transition-base);
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width var(--transition-base), transform var(--transition-base);
+}
+
+/* Collapsed Desktop Sidebar */
+@media (min-width: 1025px) {
+  .sidebar.collapsed {
+    width: 100px;
+  }
+  .sidebar.collapsed .sidebar-text,
+  .sidebar.collapsed .sidebar-footer-text {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+  }
+  .sidebar.collapsed .logo-text-container {
+    display: none;
+  }
+  .sidebar.collapsed .sidebar-link {
+    justify-content: center;
+    padding: var(--space-3);
+  }
+  .sidebar.collapsed .sidebar-link-icon {
+    margin: 0;
+  }
 }
 .sidebar-header {
   padding: var(--space-6);
@@ -482,11 +507,16 @@ img { max-width: 100%; }
   border-top: 1px solid var(--border-default);
 }
 
-/* MAIN CONTENT */
 .main-content {
   flex: 1;
   margin-left: var(--sidebar-width);
   min-height: 100vh;
+  transition: margin-left var(--transition-base);
+}
+@media (min-width: 1025px) {
+  .main-content.expanded {
+    margin-left: 100px;
+  }
 }
 .main-header {
   height: var(--header-height);
