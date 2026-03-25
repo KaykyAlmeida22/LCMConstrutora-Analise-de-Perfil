@@ -2,6 +2,48 @@ import type { FormStep } from '../types';
 
 export const formSteps: FormStep[] = [
   {
+    id: 'bloco0_dados_pessoais',
+    title: 'Dados Pessoais',
+    description: 'Confirme seus dados básicos de contato e identificação.',
+    questions: [
+      {
+        id: 'nome_completo',
+        label: 'Nome Completo:',
+        type: 'text',
+        required: true,
+      },
+      {
+        id: 'cpf',
+        label: 'CPF:',
+        type: 'text',
+        required: true,
+      },
+      {
+        id: 'telefone',
+        label: 'Telefone:',
+        type: 'text',
+        required: true,
+      },
+      {
+        id: 'endereco',
+        label: 'Endereço (Rua, Nº, Bairro):',
+        type: 'text',
+        required: true,
+      },
+      {
+        id: 'municipio_projeto',
+        label: 'Município de interesse:',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'Extrema', label: 'Extrema (MG)' },
+          { value: 'Mariana', label: 'Mariana (MG)' },
+          { value: 'Outros', label: 'Outros' }
+        ]
+      }
+    ]
+  },
+  {
     id: 'bloco1_moradia',
     title: 'Situação de Moradia',
     description: 'Informações sobre onde você mora atualmente.',

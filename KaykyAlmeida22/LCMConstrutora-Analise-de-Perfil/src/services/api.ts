@@ -125,6 +125,20 @@ export const api = {
       return undefined;
     }
 
+    // Sync core candidate data
+    const candidateData = {
+        nome_completo: answers.nome_completo,
+        cpf: answers.cpf,
+        telefone: answers.telefone,
+        endereco: answers.endereco,
+        municipio_projeto: answers.municipio_projeto
+    };
+
+    // Only update if at least one field is present
+    if (Object.values(candidateData).some(v => v !== undefined)) {
+        await supabase.from('candidatos').update(candidateData).eq('id', id);
+    }
+
     // Save Dependents
     if (dependentes && dependentes.length > 0) {
       // Clear old dependents first

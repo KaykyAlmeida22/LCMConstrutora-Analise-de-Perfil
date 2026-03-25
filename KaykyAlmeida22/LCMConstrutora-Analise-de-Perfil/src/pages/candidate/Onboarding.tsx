@@ -4,8 +4,14 @@ import { formSteps } from '../../data/formSteps';
 import { api } from '../../services/api';
 import type { FormAnswers, FormStep, FormField, Dependent } from '../../types';
 import { ArrowRight, ArrowLeft, Check, X, Plus } from 'lucide-react';
+import { cpfService } from '../../services/cpfService';
 
 const EMPTY_ANSWERS: FormAnswers = {
+  nome_completo: '',
+  cpf: '',
+  telefone: '',
+  endereco: '',
+  municipio_projeto: '',
   tipo_residencia: '',
   valor_aluguel: 0,
   teve_imovel_anterior: false,
@@ -49,6 +55,7 @@ export default function Onboarding() {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<FormAnswers>({ ...EMPTY_ANSWERS });
+  const [isConsultingCpf, setIsConsultingCpf] = useState(false);
   const [saving, setSaving] = useState(false);
   const [candidateName, setCandidateName] = useState('');
 
@@ -57,13 +64,32 @@ export default function Onboarding() {
       api.getCandidate(candidateId).then((c) => {
         if (c) {
           setCandidateName(c.nome_completo);
-          if (c.fichas_cadastrais) {
-            setAnswers(c.fichas_cadastrais);
-          }
+          
+          // Pre-fill answers from both the core candidate and the ficha
+          const initialAnswers = { 
+            ...EMPTY_ANSWERS,
+            nome_completo: c.nome_completo,
+            cpf: c.cpf,
+            telefone: c.telefone,
+            endereco: c.endereco,
+            municipio_projeto: c.municipio_projeto,
+            ...(c.fichas_cadastrais || {})
+          };
+          setAnswers(initialAnswers);
         }
       });
     }
   }, [candidateId]);
+
+  // Auto-consulta CPF when 11 digits are entered
+  useEffect(() => {
+    const cpf = answers.cpf?.replace(/\D/g, '') || '';
+    const isPlaceholder = !answers.nome_completo || answers.nome_completo === 'Em Preenchimento';
+    
+    if (cpf.length === 11 && isPlaceholder && !isConsultingCpf) {
+      handleConsultaCpf();
+    }
+  }, [answers.cpf]);
 
   const step: FormStep = formSteps[currentStep];
   const totalSteps = formSteps.length;
@@ -146,6 +172,29 @@ export default function Onboarding() {
         navigate('/');
       }
       setSaving(false);
+    }
+  }
+
+  async function handleConsultaCpf() {
+    const cpf = answers.cpf || '';
+    if (!cpf) return;
+    
+    setIsConsultingCpf(true);
+    try {
+      const result = await cpfService.consultaCPF(cpf);
+      if (result.code === 200 && result.data) {
+        setAnswers(prev => ({
+          ...prev,
+          nome_completo: result.data?.nome || prev.nome_completo
+        }));
+      } else {
+        alert(result.message || 'CPF não encontrado ou erro na consulta.');
+      }
+    } catch (error) {
+      console.error('Erro na consulta capf:', error);
+      alert('Ocorreu um erro ao consultar o CPF.');
+    } finally {
+      setIsConsultingCpf(false);
     }
   }
 
@@ -302,13 +351,26 @@ export default function Onboarding() {
                 )}
 
                 {q.type === 'text' && (
-                  <textarea
-                    className="form-textarea"
-                    placeholder="Escreva aqui..."
-                    value={(answers as any)[q.id] || ''}
-                    onChange={(e) => handleAnswer(q.id, e.target.value)}
-                    rows={4}
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      className="form-input"
+                      type="text"
+                      placeholder={q.id === 'cpf' ? '000.000.000-00' : 'Escreva aqui...'}
+                      value={(answers as any)[q.id] || ''}
+                      onChange={(e) => handleAnswer(q.id, e.target.value)}
+                      style={{ 
+                        paddingRight: q.id === 'cpf' && isConsultingCpf ? '40px' : '12px' 
+                      }}
+                    />
+                    {q.id === 'cpf' && isConsultingCpf && (
+                      <div style={{ 
+                        position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                        display: 'flex', alignItems: 'center'
+                      }}>
+                        <div className="spinner-sm" /> 
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {q.type === 'dependentes_array' && (

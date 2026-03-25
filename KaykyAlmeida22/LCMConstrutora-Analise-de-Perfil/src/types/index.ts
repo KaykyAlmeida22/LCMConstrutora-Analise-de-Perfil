@@ -33,6 +33,13 @@ export interface Document {
 
 export interface FormAnswers {
   candidato_id?: string;
+  // Dados Básicos
+  nome_completo?: string;
+  cpf?: string;
+  telefone?: string;
+  endereco?: string;
+  municipio_projeto?: string;
+
   // Bloco 1: Moradia
   tipo_residencia?: string;
   valor_aluguel?: number;
