@@ -1,11 +1,9 @@
 import { jsPDF } from 'jspdf';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Configure PDF.js worker - Using workerPort for better synchronization in Vite
-const worker = new Worker(new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url), {
-  type: 'module',
-});
-pdfjsLib.GlobalWorkerOptions.workerPort = worker;
+// LAST RESORT: Disable worker to avoid "this[#methodPromises].getOrInsertComputed is not a function"
+// This forces pdf.js to run in the main thread, which is safer for some Vite environments.
+pdfjsLib.GlobalWorkerOptions.workerSrc = '';
 
 /**
  * Converts an image file (JPG/PNG) into a single-page PDF blob.
