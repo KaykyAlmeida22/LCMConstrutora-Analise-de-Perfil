@@ -467,9 +467,9 @@ img { max-width: 100%; }
   color: var(--text-primary);
 }
 .sidebar-link.active {
-  background: var(--bg-tertiary);
+  background: var(--primary-600);
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(140, 198, 63, 0.25);
 }
 .sidebar-link-icon {
   width: 20px;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { LayoutDashboard, Users, UserPlus, Home, Menu, Building2 } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, Home, Menu } from 'lucide-react';
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -31,34 +31,15 @@ export default function AdminLayout() {
             style={{
               padding: '16px',
               borderRadius: '16px',
-              background: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-default)',
+              background: 'var(--primary-600)',
+              border: 'none',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
+              justifyContent: 'center',
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
             }}
           >
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, var(--gray-700), var(--gray-600))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '0.85rem',
-                fontWeight: 800,
-                color: 'white',
-              }}
-            >
-              <Building2 size={20} />
-            </div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'white' }}>MCMV Cidades</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Módulo Análise</div>
-            </div>
+            <img src="/logo.png" alt="LCM Construtora" style={{ height: '40px', objectFit: 'contain' }} />
           </div>
         </div>
 

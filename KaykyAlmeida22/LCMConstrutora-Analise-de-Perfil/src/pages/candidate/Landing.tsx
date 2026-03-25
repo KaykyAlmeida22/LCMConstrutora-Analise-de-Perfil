@@ -54,7 +54,7 @@ export default function Landing() {
         }
 
         const newCandidate = await api.createCandidate({
-           nome_completo: 'Candidato em Preenchimento',
+           nome_completo: 'Em Preenchimento',
            cpf: formatCPF(cleanCpf),
            telefone: '',
            endereco: '',

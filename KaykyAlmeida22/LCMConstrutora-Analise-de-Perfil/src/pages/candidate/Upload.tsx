@@ -4,7 +4,6 @@ import { api } from '../../services/api';
 import { validateDocument } from '../../services/aiValidation';
 import { getRequiredDocuments, getDocumentName } from '../../services/documentRules';
 import type { Candidate, DocumentType, Document } from '../../types';
-import ConfidenceMeter from '../../components/shared/ConfidenceMeter';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { 
   Building2, XCircle, FileText, Camera, UploadCloud, 
@@ -89,6 +88,7 @@ export default function Upload() {
           
           await api.updateDocument(createdDoc.id, {
             status_ia: iaResult.isValid ? 'Aprovado' : 'Rejeitado',
+            status_upload: iaResult.isValid ? 'Enviado' : 'Rejeitado',  // Sync status_upload with AI result
             confianca_leitura_ia: iaResult.confidence,
             alertas_ia: {
                 issues: iaResult.issues,
@@ -96,6 +96,16 @@ export default function Upload() {
                 expiryCheck: iaResult.expiryCheck
             }
           });
+
+          // Move candidate to 'aguardando_correcao' if rejected
+          if (!iaResult.isValid) {
+            await api.updateStatus(
+              candidate.id, 
+              'aguardando_correcao', 
+              undefined, 
+              `Documento (${getDocumentName(selectedDocType)}) rejeitado automaticamente pela IA.`
+            );
+          }
       }
       
       await loadCandidate();
@@ -326,14 +336,32 @@ export default function Upload() {
 
                   {doc.status_ia !== 'Pendente' && (
                     <div style={{ marginTop: '12px' }}>
-                      <div style={{ marginBottom: '8px' }}>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                          IA (Confiança):
-                        </span>
-                        <ConfidenceMeter value={doc.confianca_leitura_ia || 0} size="sm" />
-                      </div>
                       
-                      {doc.status_upload === 'Rejeitado' && (
+                      {/* AI Reject Reason Alert */}
+                      {(doc.status_ia === 'Rejeitado' || doc.status_upload === 'Rejeitado') && doc.alertas_ia?.issues && doc.alertas_ia.issues.length > 0 && (
+                        <div style={{ 
+                          marginBottom: '12px', 
+                          padding: '10px 12px', 
+                          background: 'rgba(239, 68, 68, 0.08)', 
+                          border: '1px solid rgba(239, 68, 68, 0.2)', 
+                          borderRadius: '8px', 
+                          color: 'var(--danger-500)', 
+                          fontSize: '0.82rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px'
+                        }}>
+                          <strong>Motivo da recusa:</strong>
+                          <ul style={{ margin: 0, paddingLeft: '16px', listStyleType: 'disc' }}>
+                            {doc.alertas_ia.issues.map((issue: string, idx: number) => (
+                              <li key={idx}>{issue}</li>
+                            ))}
+                          </ul>
+                          <div style={{ marginTop: '4px', fontWeight: 600 }}>Por favor, tire uma nova foto e reenvie.</div>
+                        </div>
+                      )}
+
+                      {(doc.status_upload === 'Rejeitado' || doc.status_ia === 'Rejeitado') && (
                         <button
                           className="btn btn-outline btn-sm flex items-center gap-2"
                           style={{ marginTop: '8px' }}
