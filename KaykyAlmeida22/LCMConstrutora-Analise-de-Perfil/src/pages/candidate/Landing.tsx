@@ -112,7 +112,7 @@ export default function Landing() {
         </div>
         <button 
           className="btn btn-ghost btn-sm" 
-          style={{ border: '1px solid var(--border-default)', borderRadius: '99px', padding: '6px 16px', fontSize: '0.8rem' }}
+          style={{ border: '1px solid rgba(255,255,255,0.35)', borderRadius: '99px', padding: '6px 16px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.85)' }}
           onClick={() => navigate('/admin/login')}
         >
           Área da Equipe

@@ -149,68 +149,68 @@ export default function Onboarding() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '32px 24px', position: 'relative', overflow: 'hidden' }}>
-      
-      {/* Background Glow */}
-      <div style={{
-         position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100vw', height: '40vh',
-         background: 'radial-gradient(ellipse at top, rgba(140, 198, 63, 0.12) 0%, rgba(255,255,255,0) 70%)',
-         zIndex: 0, pointerEvents: 'none'
-      }} />
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column' }}>
 
-      <div style={{ maxWidth: '680px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
-        {/* Header */}
-        <div className="animate-slideDown" style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <div style={{ marginBottom: '20px', display: 'inline-block', background: '#1a2a0e', borderRadius: '12px', padding: '8px 20px' }}>
-            <img 
-              src="/logo.png" 
-              alt="LCM Construtora" 
-              style={{ height: '56px', objectFit: 'contain', display: 'block' }} 
+      {/* Dark Green Header Banner */}
+      <div style={{
+        background: '#1a2a0e',
+        padding: '40px 24px 56px',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+          width: '80%', height: '100%',
+          background: 'radial-gradient(ellipse at top, rgba(140,198,63,0.15) 0%, transparent 70%)',
+          pointerEvents: 'none'
+        }} />
+        <div className="animate-slideDown" style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ marginBottom: '20px' }}>
+            <img
+              src="/logo.png"
+              alt="LCM Construtora"
+              style={{ height: '60px', objectFit: 'contain', display: 'inline-block' }}
             />
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em', color: '#ffffff' }}>
             Ficha Pré-Cadastral
           </h1>
           {candidateName && (
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '4px' }}>
-              Candidato(a): <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{candidateName}</strong>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.95rem', marginBottom: '4px' }}>
+              Candidato(a): <strong style={{ color: '#ffffff', fontWeight: 600 }}>{candidateName}</strong>
             </p>
           )}
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
             Preencha seus dados com atenção. Etapa {currentStep + 1} de {totalSteps}.
           </p>
         </div>
+      </div>
 
-        {/* Progress bar */}
-        <div style={{ marginBottom: '32px' }}>
-          <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              Etapa {currentStep + 1} de {totalSteps}
-            </span>
-            <span style={{ fontSize: '0.78rem', color: 'var(--primary-400)', fontWeight: 600 }}>
-              {Math.round(progress)}%
-            </span>
-          </div>
-          <div
-            style={{
-              width: '100%',
-              height: '6px',
-              background: 'var(--bg-tertiary)',
-              borderRadius: '999px',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
+      {/* Content Area */}
+      <div style={{ flex: 1, padding: '0 24px 40px', marginTop: '-24px', position: 'relative', zIndex: 10 }}>
+        <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+
+          {/* Progress bar */}
+          <div style={{ marginBottom: '24px', background: 'var(--bg-primary)', borderRadius: '12px', padding: '16px 20px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-default)' }}>
+            <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                Etapa {currentStep + 1} de {totalSteps}
+              </span>
+              <span style={{ fontSize: '0.78rem', color: 'var(--primary-600)', fontWeight: 600 }}>
+                {Math.round(progress)}%
+              </span>
+            </div>
+            <div style={{ width: '100%', height: '6px', background: 'var(--border-default)', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{
                 width: `${progress}%`,
                 height: '100%',
                 background: 'linear-gradient(90deg, var(--primary-600), var(--primary-400))',
                 borderRadius: '999px',
                 transition: 'width 0.4s ease',
-              }}
-            />
+              }} />
+            </div>
           </div>
-        </div>
 
         {/* Step Card */}
         <div className="card animate-slideUp" key={step.id} style={{ marginBottom: '24px' }}>
@@ -449,6 +449,7 @@ export default function Onboarding() {
               ? <><Check size={20} /> Finalizar Ficha</>
               : <>Próximo <ArrowRight size={20} /></>}
           </button>
+        </div>
         </div>
       </div>
     </div>

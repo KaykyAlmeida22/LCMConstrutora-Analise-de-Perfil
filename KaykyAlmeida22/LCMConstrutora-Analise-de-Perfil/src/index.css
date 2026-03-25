@@ -954,8 +954,8 @@ img { max-width: 100%; }
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
   border: 1px solid var(--border-default);
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
+  background: #ffffff;
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 0.9rem;
   transition: all var(--transition-fast);
@@ -963,12 +963,14 @@ img { max-width: 100%; }
   text-align: center;
 }
 .toggle-btn:hover {
-  border-color: var(--border-hover);
+  border-color: var(--primary-600);
+  background: rgba(140, 198, 63, 0.06);
 }
 .toggle-btn.selected {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: var(--primary-500);
-  color: var(--primary-400);
+  background: rgba(140, 198, 63, 0.15);
+  border-color: var(--primary-600);
+  color: var(--primary-700);
+  font-weight: 600;
 }
 
 /* ===== EMPTY STATE ===== */
