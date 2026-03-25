@@ -71,6 +71,9 @@ export default function Onboarding() {
   function shouldShowQuestion(q: FormField): boolean {
     if (!q.conditionalOn) return true;
     const parentVal = (answers as any)[q.conditionalOn.field];
+    if (Array.isArray(q.conditionalOn.value)) {
+      return q.conditionalOn.value.includes(parentVal);
+    }
     return parentVal === q.conditionalOn.value;
   }
 
@@ -271,6 +274,16 @@ export default function Onboarding() {
                     type="number"
                     value={(answers as any)[q.id] || ''}
                     onChange={(e) => handleAnswer(q.id, parseFloat(e.target.value) || 0)}
+                  />
+                )}
+
+                {q.type === 'textarea' && (
+                  <textarea
+                    className="form-textarea"
+                    placeholder="Descreva aqui sua atividade e fonte de renda..."
+                    rows={4}
+                    value={((answers as any)[q.id] as string) || ''}
+                    onChange={(e) => handleAnswer(q.id, e.target.value)}
                   />
                 )}
 

@@ -254,6 +254,36 @@ export default function CandidateDetail() {
         </div>
       </div>
 
+      {/* Global Alerts */}
+      {candidate.fichas_cadastrais && (
+        <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {candidate.fichas_cadastrais.tem_imovel && (
+            <div className="alert alert-warning">
+              <span className="alert-icon"><AlertTriangle size={20} /></span>
+              <div>
+                <strong>Atenção:</strong> Candidato declarou possuir imóvel em seu nome neste instante.
+              </div>
+            </div>
+          )}
+          {candidate.fichas_cadastrais.financiamento_habitacional_pos_2005 && (
+            <div className="alert alert-error">
+              <span className="alert-icon"><Ban size={20} /></span>
+              <div>
+                <strong>Subsídio Bloqueado:</strong> Candidato recebeu benefício habitacional após 16/05/2005. Processo pode continuar sem subsídio.
+              </div>
+            </div>
+          )}
+          {candidate.fichas_cadastrais.tipo_renda === 'Sem_renda' && (
+            <div className="alert alert-error">
+              <span className="alert-icon"><Wallet size={20} /></span>
+              <div>
+                <strong>Sem Renda Comprovável:</strong> Candidato declarou não possuir renda alguma. (Avaliar reprovação)
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="tabs">
         <button className={`tab ${activeTab === 'dados' ? 'active' : ''}`} onClick={() => setActiveTab('dados')}>
@@ -328,32 +358,6 @@ export default function CandidateDetail() {
                  </div>
               )}
 
-              {/* Alerts */}
-              {candidate.fichas_cadastrais.tem_imovel && (
-                <div className="alert alert-warning" style={{ marginTop: '16px' }}>
-                  <span className="alert-icon"><AlertTriangle size={20} /></span>
-                  <div>
-                    <strong>Atenção:</strong> Candidato declarou possuir imóvel em seu nome neste instante.
-                  </div>
-                </div>
-              )}
-              {candidate.fichas_cadastrais.financiamento_habitacional_pos_2005 && (
-                <div className="alert alert-error" style={{ marginTop: '16px' }}>
-                  <span className="alert-icon"><Ban size={20} /></span>
-                  <div>
-                    <strong>Subsídio Bloqueado:</strong> Candidato recebeu benefício habitacional após 16/05/2005. Processo pode continuar sem subsídio.
-                  </div>
-                </div>
-              )}
-              {candidate.fichas_cadastrais.tipo_renda === 'Sem_renda' && (
-                <div className="alert alert-error" style={{ marginTop: '16px' }}>
-                  <span className="alert-icon"><Wallet size={20} /></span>
-                  <div>
-                    <strong>Sem Renda Comprovável:</strong> Candidato declarou não possuir renda alguma. (Avaliar reprovação)
-                  </div>
-                </div>
-              )}
-
               {/* Narrative */}
               <div style={{ marginTop: '24px' }}>
                 <h3 className="detail-section-title flex items-center gap-2"><BookOpen size={20} className="text-primary-400" /> Narrativa sobre Atividade e Renda</h3>
@@ -365,7 +369,7 @@ export default function CandidateDetail() {
                   }}
                 >
                   <p style={{ fontSize: '0.9rem', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                    {candidate.narrativa_renda || '(Nenhuma narrativa fornecida)'}
+                    {candidate.fichas_cadastrais.narrativa_renda || '(Nenhuma narrativa fornecida)'}
                   </p>
                 </div>
               </div>

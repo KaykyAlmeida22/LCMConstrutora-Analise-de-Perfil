@@ -320,6 +320,13 @@ export const formSteps: FormStep[] = [
         type: 'boolean',
         required: true,
         conditionalOn: { field: 'tipo_renda', value: 'Informal' }
+      },
+      {
+        id: 'narrativa_renda',
+        label: 'Faça um breve relato da sua atividade. Exemplo: trabalho como confeiteira em casa, vendo pelos aplicativos X e Y desde 2020, com renda média de R$ X por mês.',
+        type: 'textarea',
+        required: true,
+        conditionalOn: { field: 'tipo_renda', value: ['Informal', 'MEI', 'Mista'] }
       }
     ]
   }

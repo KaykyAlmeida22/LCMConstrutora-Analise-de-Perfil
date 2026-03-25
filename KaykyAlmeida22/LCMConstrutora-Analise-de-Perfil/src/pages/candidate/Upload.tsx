@@ -6,7 +6,7 @@ import { getRequiredDocuments, getDocumentName } from '../../services/documentRu
 import type { Candidate, DocumentType, Document } from '../../types';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { 
-  Building2, XCircle, FileText, Camera, UploadCloud, 
+  XCircle, FileText, Camera, UploadCloud, 
   CheckCircle, Paperclip, RefreshCw, PartyPopper 
 } from 'lucide-react';
 
@@ -163,82 +163,74 @@ export default function Upload() {
   const missingDocs = reqList.filter((dt) => !uploadedTypes.includes(dt));
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '32px 24px', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column' }}>
       
-      {/* Background Glow */}
+      {/* Dark Green Header Banner */}
       <div style={{
-         position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100vw', height: '40vh',
-         background: 'radial-gradient(ellipse at top, rgba(59, 130, 246, 0.1) 0%, rgba(0,0,0,0) 70%)',
-         zIndex: 0, pointerEvents: 'none'
-      }} />
-
-      <div style={{ maxWidth: '780px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf,.jpg,.jpeg,.png"
-          style={{ display: 'none' }}
-          onChange={handleFileSelected}
-        />
-
-        {/* Header */}
-        <div className="animate-slideDown" style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: '16px',
-              background: 'linear-gradient(135deg, var(--primary-600), var(--primary-800))',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              marginBottom: '20px',
-              boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4), inset 0 1px 1px rgba(255,255,255,0.2)',
-              border: '1px solid rgba(255,255,255,0.1)'
-            }}
-          >
-            <Building2 size={28} strokeWidth={1.5} />
-          </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em' }}>
-            Envio de Documentos
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            <strong>{candidate.nome_completo}</strong> — CPF: {candidate.cpf}
-          </p>
-        </div>
-
-        {/* Progress */}
-        <div className="card animate-slideUp" style={{ marginBottom: '24px', background: 'rgba(59, 130, 246, 0.05)', borderColor: 'rgba(59, 130, 246, 0.15)' }}>
-          <div className="flex justify-between items-center" style={{ marginBottom: '12px' }}>
-            <span className="flex items-center gap-2" style={{ fontSize: '0.9rem', fontWeight: 600 }}>
-              <FileText size={18} className="text-primary-400" /> Progresso dos Documentos
-            </span>
-            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-400)' }}>
-              {documentos.length}/{reqList.length}
-            </span>
-          </div>
-          <div
-            style={{
-              width: '100%',
-              height: '6px',
-              background: 'var(--bg-tertiary)',
-              borderRadius: '999px',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                width: `${reqList.length > 0 ? (documentos.length / reqList.length) * 100 : 0}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, var(--primary-600), var(--success-500))',
-                borderRadius: '999px',
-                transition: 'width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-              }}
+        background: '#1a2a0e',
+        padding: '40px 24px 56px',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+          width: '80%', height: '100%',
+          background: 'radial-gradient(ellipse at top, rgba(140,198,63,0.15) 0%, transparent 70%)',
+          pointerEvents: 'none'
+        }} />
+        <div className="animate-slideDown" style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ marginBottom: '20px' }}>
+            <img
+              src="/logo.png"
+              alt="LCM Construtora"
+              style={{ height: '60px', objectFit: 'contain', display: 'inline-block' }}
             />
           </div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em', color: '#ffffff' }}>
+            Envio de Documentos
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.95rem', marginBottom: '4px' }}>
+            Candidato(a): <strong style={{ color: '#ffffff', fontWeight: 600 }}>{candidate.nome_completo}</strong>
+          </p>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
+            CPF: {candidate.cpf}
+          </p>
         </div>
+      </div>
+
+      {/* Content Area */}
+      <div style={{ flex: 1, padding: '0 24px 40px', marginTop: '-24px', position: 'relative', zIndex: 10 }}>
+        <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            style={{ display: 'none' }}
+            onChange={handleFileSelected}
+          />
+
+          {/* Progress bar */}
+          <div style={{ marginBottom: '24px', background: 'var(--bg-primary)', borderRadius: '12px', padding: '16px 20px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-default)' }}>
+            <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
+              <span className="flex items-center gap-2" style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                <FileText size={18} className="text-primary-500" /> Progresso dos Documentos
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-600)' }}>
+                {documentos.length}/{reqList.length}
+              </span>
+            </div>
+            <div style={{ width: '100%', height: '6px', background: 'var(--border-default)', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{
+                width: `${reqList.length > 0 ? (documentos.length / reqList.length) * 100 : 0}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, var(--primary-600), var(--primary-400))',
+                borderRadius: '999px',
+                transition: 'width 0.4s ease',
+              }} />
+            </div>
+          </div>
 
         {/* Photo Tips */}
         <div className="photo-tips animate-slideUp" style={{ marginBottom: '32px' }}>
@@ -378,6 +370,8 @@ export default function Upload() {
           </div>
         )}
 
+
+
         {/* All done */}
         {missingDocs.length === 0 && documentos.length > 0 && (
           <div className="card animate-slideUp" style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.06)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
@@ -397,5 +391,6 @@ export default function Upload() {
         )}
       </div>
     </div>
+  </div>
   );
 }
