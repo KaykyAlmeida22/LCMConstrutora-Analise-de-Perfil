@@ -2,20 +2,21 @@
 
 /* ===== CSS VARIABLES (DESIGN TOKENS) ===== */
 :root {
-  /* Brand Primary - Electric Indigo */
-  --primary-50:  #eef2ff;
-  --primary-100: #e0e7ff;
-  --primary-400: #818cf8;
-  --primary-500: #6366f1;
-  --primary-600: #4f46e5;
-  --primary-700: #4338ca;
+  /* Brand Primary - LCM Green */
+  --primary-50:  #f4fad7;
+  --primary-100: #e6f5aa;
+  --primary-400: #a3d94e;
+  --primary-500: #8cc63f;   /* LCM Core Green */
+  --primary-600: #75a832;
+  --primary-700: #5d8727;
+  --primary-800: #46671d;
 
-  /* Accent - Teal/Cyan for highlights */
-  --accent-400: #2dd4bf;
-  --accent-500: #14b8a6;
-  --accent-600: #0d9488;
+  /* Accent - Dark Green */
+  --accent-400: #5c8f30;
+  --accent-500: #4a7a2a;
+  --accent-600: #39631f;
 
-  /* Status Colors (Refined & Desaturated) */
+  /* Status Colors */
   --success-400: #34d399;
   --success-500: #10b981;
   
@@ -25,7 +26,7 @@
   --warning-400: #fbbf24;
   --warning-500: #f59e0b;
 
-  /* Neutrals (Slate/Midnight) */
+  /* Neutrals */
   --gray-50:  #f8fafc;
   --gray-100: #f1f5f9;
   --gray-200: #e2e8f0;
@@ -37,30 +38,30 @@
   --gray-800: #1e293b;
   --gray-900: #0f172a;
 
-  /* Surfaces (Ultra Dark Theme) */
-  --bg-primary: #080b12; /* Deepest off-black */
-  --bg-secondary: #0e1422; /* App background */
-  --bg-tertiary: #141c2d; /* Elevated elements */
-  --bg-card: #111827; /* Cards & Modals */
-  --bg-glass: rgba(17, 24, 39, 0.7);
-  --bg-hover: rgba(255, 255, 255, 0.04);
-  --bg-active: rgba(255, 255, 255, 0.08);
+  /* Surfaces (LCM Light Theme) */
+  --bg-primary: #ffffff; 
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-active: rgba(0, 0, 0, 0.08);
 
   /* Texts */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
   --text-muted: #64748b;
 
   /* Borders */
-  --border-default: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(255, 255, 255, 0.12);
+  --border-default: rgba(0, 0, 0, 0.22);
+  --border-hover: rgba(0, 0, 0, 0.35);
   --border-focus: var(--primary-500);
 
-  /* Shadows (Soft & Deep) */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 8px 20px -4px rgba(99, 102, 241, 0.3);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 8px 20px -4px rgba(140, 198, 63, 0.4);
 
   /* Radius (More sharp/modern) */
   --radius-sm: 4px;
@@ -225,10 +226,10 @@ img { max-width: 100%; }
   pointer-events: none;
 }
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 .btn-primary:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
@@ -238,7 +239,7 @@ img { max-width: 100%; }
 .btn-success {
   background: var(--success-500);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,0,0,0.05);
   box-shadow: var(--shadow-sm);
 }
 .btn-success:hover:not(:disabled) {
@@ -249,7 +250,7 @@ img { max-width: 100%; }
 .btn-danger {
   background: var(--danger-500);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,0,0,0.05);
   box-shadow: var(--shadow-sm);
 }
 .btn-danger:hover:not(:disabled) {
@@ -494,7 +495,7 @@ img { max-width: 100%; }
   justify-content: space-between;
   padding: 0 var(--space-8);
   border-bottom: 1px solid var(--border-default);
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
@@ -564,9 +565,9 @@ img { max-width: 100%; }
 .table-container {
   overflow-x: auto;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-default);
   background: var(--bg-card);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 .table {
   width: 100%;
@@ -581,12 +582,12 @@ img { max-width: 100%; }
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid var(--border-default);
   background: transparent;
 }
 .table td {
   padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid var(--border-default);
   font-size: 0.9rem;
   vertical-align: middle;
 }

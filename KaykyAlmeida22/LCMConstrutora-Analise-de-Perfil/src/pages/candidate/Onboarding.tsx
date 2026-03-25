@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { formSteps } from '../../data/formSteps';
 import { api } from '../../services/api';
 import type { FormAnswers, FormStep, FormField, Dependent } from '../../types';
-import { Building2, ArrowRight, ArrowLeft, Check, X, Plus } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, X, Plus } from 'lucide-react';
 
 const EMPTY_ANSWERS: FormAnswers = {
   tipo_residencia: '',
@@ -154,29 +154,19 @@ export default function Onboarding() {
       {/* Background Glow */}
       <div style={{
          position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100vw', height: '40vh',
-         background: 'radial-gradient(ellipse at top, rgba(59, 130, 246, 0.1) 0%, rgba(0,0,0,0) 70%)',
+         background: 'radial-gradient(ellipse at top, rgba(140, 198, 63, 0.12) 0%, rgba(255,255,255,0) 70%)',
          zIndex: 0, pointerEvents: 'none'
       }} />
 
       <div style={{ maxWidth: '680px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
         {/* Header */}
         <div className="animate-slideDown" style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: '16px',
-              background: 'linear-gradient(135deg, var(--primary-600), var(--primary-800))',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              marginBottom: '20px',
-              boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4), inset 0 1px 1px rgba(255,255,255,0.2)',
-              border: '1px solid rgba(255,255,255,0.1)'
-            }}
-          >
-            <Building2 size={28} strokeWidth={1.5} />
+          <div style={{ marginBottom: '20px', display: 'inline-block', background: '#1a2a0e', borderRadius: '12px', padding: '8px 20px' }}>
+            <img 
+              src="/logo.png" 
+              alt="LCM Construtora" 
+              style={{ height: '56px', objectFit: 'contain', display: 'block' }} 
+            />
           </div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em' }}>
             Ficha Pré-Cadastral
@@ -268,12 +258,6 @@ export default function Onboarding() {
                           onClick={() => handleAnswer(q.id, opt.value)}
                           style={{ textAlign: 'left', flex: 'none', justifyContent: 'flex-start' }}
                         >
-                          <div style={{ 
-                            width: 16, height: 16, borderRadius: '50%', 
-                            border: `2px solid ${isSelected ? 'white' : 'var(--border-strong)'}`,
-                            background: isSelected ? 'white' : 'transparent',
-                            marginRight: '8px', flexShrink: 0
-                           }} />
                           {opt.label}
                         </button>
                       );

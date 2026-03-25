@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
-import { Building2, ArrowRight, AlertCircle, ShieldCheck } from 'lucide-react';
+import { ArrowRight, AlertCircle, ShieldCheck } from 'lucide-react';
 
 export default function Landing() {
   const navigate = useNavigate();
   const [cpf, setCpf] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isNewRegistration, setIsNewRegistration] = useState(false);
 
   function formatCPF(value: string): string {
     const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -20,13 +21,14 @@ export default function Landing() {
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setCpf(formatCPF(e.target.value));
     setError('');
+    setIsNewRegistration(false);
   }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     const cleanCpf = cpf.replace(/\D/g, '');
     if (cleanCpf.length !== 11) {
-      setError('Por favor, informe um CPF válido.');
+      setError('O CPF digitado está incompleto. Verifique os números e tente novamente.');
       return;
     }
 
@@ -46,6 +48,11 @@ export default function Landing() {
           navigate(`/upload?id=${candidate.id}`);
         }
       } else {
+        if (!isNewRegistration) {
+           setIsNewRegistration(true);
+           return;
+        }
+
         const newCandidate = await api.createCandidate({
            nome_completo: 'Candidato em Preenchimento',
            cpf: formatCPF(cleanCpf),
@@ -57,12 +64,12 @@ export default function Landing() {
         if (newCandidate) {
             navigate(`/onboarding?id=${newCandidate.id}`);
         } else {
-           setError('Erro ao criar seu cadastro. Tente novamente.');
+           setError('Tivemos um problema ao iniciar seu cadastro. Tente de novo.');
         }
       }
     } catch (err) {
       console.error(err);
-      setError('Ocorreu um erro ao consultar seu CPF. Tente novamente mais tarde.');
+      setError('Não conseguimos consultar seu CPF agora. Tente de novo em alguns instantes.');
     } finally {
       setLoading(false);
     }
@@ -74,12 +81,12 @@ export default function Landing() {
       {/* Background Orbs Effect */}
       <div style={{
          position: 'absolute', top: '-10%', left: '-10%', width: '50vw', height: '50vw',
-         background: 'radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(0,0,0,0) 70%)',
+         background: 'radial-gradient(circle, rgba(140, 198, 63, 0.15) 0%, rgba(255,255,255,0) 70%)',
          zIndex: 0, pointerEvents: 'none'
       }} />
       <div style={{
          position: 'absolute', bottom: '-20%', right: '-10%', width: '60vw', height: '60vw',
-         background: 'radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, rgba(0,0,0,0) 70%)',
+         background: 'radial-gradient(circle, rgba(140, 198, 63, 0.1) 0%, rgba(255,255,255,0) 70%)',
          zIndex: 0, pointerEvents: 'none'
       }} />
 
@@ -91,39 +98,24 @@ export default function Landing() {
           justifyContent: 'space-between',
           alignItems: 'center',
           borderBottom: '1px solid var(--border-default)',
-          background: 'rgba(8, 11, 18, 0.65)',
+          background: '#1a2a0e',
           backdropFilter: 'blur(20px)',
           zIndex: 10
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, var(--primary-600), var(--primary-800))',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              boxShadow: 'var(--shadow-sm), inset 0 1px 1px rgba(255,255,255,0.2)',
-              border: '1px solid rgba(255,255,255,0.05)'
-            }}
-          >
-            <Building2 size={22} strokeWidth={1.5} />
-          </div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>LCM Construtora</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Minha Casa Minha Vida</div>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img 
+            src="/logo.png" 
+            alt="LCM Construtora" 
+            style={{ height: '52px', objectFit: 'contain' }} 
+          />
         </div>
         <button 
           className="btn btn-ghost btn-sm" 
           style={{ border: '1px solid var(--border-default)', borderRadius: '99px', padding: '6px 16px', fontSize: '0.8rem' }}
           onClick={() => navigate('/admin/login')}
         >
-          Acesso Analista
+          Área da Equipe
         </button>
       </header>
 
@@ -142,14 +134,14 @@ export default function Landing() {
             marginBottom: '24px',
             boxShadow: 'var(--shadow-lg)'
           }}>
-            <ShieldCheck size={36} className="text-primary-400" strokeWidth={1.5} />
+            <ShieldCheck size={36} style={{ color: 'var(--primary-600)' }} strokeWidth={1.5} />
           </div>
           
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '16px', lineHeight: 1.15, letterSpacing: '-0.03em' }}>
-            Acesso ao <span className="text-primary-400">Portal</span>
+            Bem-vindo à <span style={{ color: 'var(--primary-600)' }}>LCM</span>
           </h1>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '40px', fontSize: '1rem', lineHeight: 1.6 }}>
-            Acompanhe o status da sua inscrição, preencha sua ficha cadastral e envie seus documentos de forma rápida e segura.
+            Consulte sua inscrição ou comece seu cadastro para conquistar a casa própria. Tudo de forma fácil e segura.
           </p>
 
           <form
@@ -158,22 +150,22 @@ export default function Landing() {
               padding: '40px', 
               textAlign: 'left', 
               border: '1px solid var(--border-default)',
-              boxShadow: '0 24px 64px -16px rgba(0,0,0,0.6)',
+              boxShadow: '0 24px 64px -16px rgba(0,0,0,0.1)',
               background: 'var(--bg-card)',
               borderRadius: '24px'
             }}
             onSubmit={handleLogin}
           >
             <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '8px', letterSpacing: '-0.02em' }}>
-              Acesse sua área
+              Digite seu CPF para começar
             </h2>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '28px' }}>
-              Digite seu CPF para consultar ou iniciar seu cadastro.
+              Nós vamos encontrar o seu cadastro ou guiar você pelos próximos passos.
             </p>
 
             <div className="form-group" style={{ marginBottom: '28px' }}>
               <label className="form-label" htmlFor="cpf" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                CPF do Titular
+                Seu CPF
               </label>
               <input
                 id="cpf"
@@ -184,6 +176,9 @@ export default function Landing() {
                 style={{ fontSize: '1.15rem', padding: '16px', borderRadius: '12px', background: 'var(--bg-secondary)' }}
                 required
               />
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+                Digite apenas os números do seu CPF
+              </div>
             </div>
 
             {error && (
@@ -193,19 +188,31 @@ export default function Landing() {
               </div>
             )}
 
+            {isNewRegistration && !error && (
+              <div className="alert alert-info" style={{ marginBottom: '24px', borderRadius: '12px', background: 'rgba(140, 198, 63, 0.1)', border: '1px solid rgba(140, 198, 63, 0.2)', color: 'var(--text-primary)', display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '16px' }}>
+                <ShieldCheck size={20} style={{ color: 'var(--primary-600)', flexShrink: 0, marginTop: '2px' }} />
+                <span style={{ fontSize: '0.9rem', lineHeight: 1.5 }}>
+                  <strong>CPF não encontrado.</strong> Pode ficar tranquilo, clique em "Continuar" para darmos início ao seu cadastro agora mesmo.
+                </span>
+              </div>
+            )}
+
             <button
               type="submit"
               className="btn btn-primary btn-lg"
               style={{ width: '100%', padding: '16px', borderRadius: '12px', justifyContent: 'center', gap: '12px' }}
               disabled={loading || cpf.length < 14}
             >
-              <span style={{ fontSize: '1.05rem', fontWeight: 600 }}>{loading ? 'Consultando...' : 'Acessar Portal'}</span>
+              <span style={{ fontSize: '1.05rem', fontWeight: 600 }}>{loading ? 'Carregando...' : 'Continuar'}</span>
               {!loading && <ArrowRight size={20} />}
             </button>
           </form>
           
-          <div style={{ textAlign: 'center', marginTop: '32px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            Ambiente seguro e criptografado. Suas informações estão protegidas.
+          <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+              <ShieldCheck size={16} style={{ color: 'var(--primary-600)' }} />
+              <span>Seus dados são protegidos e utilizados apenas para análise do programa.</span>
+            </div>
           </div>
         </div>
       </main>
