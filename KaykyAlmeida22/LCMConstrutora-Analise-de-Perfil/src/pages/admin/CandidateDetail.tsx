@@ -9,7 +9,7 @@ import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { 
   ArrowLeft, Check, X, AlertTriangle, FileText, CheckCircle, 
   XCircle, FileWarning, User, Bot, FileEdit, Ban, Wallet, 
-  BookOpen, Paperclip, Eye 
+  BookOpen, Paperclip, Eye, Download 
 } from 'lucide-react';
 
 const FORM_ANSWER_LABELS: Record<string, string> = {
@@ -605,29 +605,24 @@ export default function CandidateDetail() {
           display: 'flex',
           flexDirection: 'column'
         }}>
-          <div style={{ padding: '16px', display: 'flex', justifyContent: 'flex-end', background: 'var(--bg-primary)' }}>
+          <div style={{ padding: '16px', display: 'flex', justifyContent: 'flex-end', gap: '8px', background: 'var(--bg-primary)' }}>
+            <a
+              href={selectedDocUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              className="btn btn-outline"
+            >
+              <Download size={16} /> Exportar PDF
+            </a>
             <button className="btn btn-primary" onClick={() => setSelectedDocUrl(null)}>Fechar Visualizador ✕</button>
           </div>
           <div style={{ flex: 1, padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-            {selectedDocUrl.toLowerCase().match(/^.*\.(jpeg|jpg|gif|png|webp)(?:\?.*)?$/) != null ? (
-              <img 
-                src={selectedDocUrl} 
-                alt="Documento" 
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
-                }} 
-              />
-            ) : (
-              <iframe 
-                 src={selectedDocUrl} 
-                 style={{ width: '100%', maxWidth: '1000px', height: '100%', backgroundColor: 'white', border: 'none', borderRadius: '8px' }}
-                 title="Document Viewer"
-              />
-            )}
+            <iframe 
+               src={selectedDocUrl} 
+               style={{ width: '100%', maxWidth: '1000px', height: '100%', backgroundColor: 'white', border: 'none', borderRadius: '8px' }}
+               title="Document Viewer"
+            />
           </div>
         </div>
       )}

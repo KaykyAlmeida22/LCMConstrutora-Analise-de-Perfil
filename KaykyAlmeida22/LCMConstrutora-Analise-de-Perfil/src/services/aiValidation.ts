@@ -37,7 +37,8 @@ const DOC_TYPE_DESCRIPTIONS: Record<string, string> = {
 export async function validateDocument(
   documentId: string,
   docType: DocumentType,
-  fileUrl: string
+  fileUrl: string,
+  options?: { isPdf?: boolean; imageDataUrl?: string }
 ): Promise<ValidationResult> {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
@@ -47,6 +48,10 @@ export async function validateDocument(
   }
 
   const docDescription = DOC_TYPE_DESCRIPTIONS[docType] ?? docType;
+  const isPdf = options?.isPdf ?? false;
+  const model = isPdf ? 'gpt-5.1' : 'gpt-4o';
+  // Use base64 data URL if provided (from PDF rendering or image), otherwise use the storage URL
+  const imageUrl = options?.imageDataUrl || fileUrl;
 
   try {
     const response = await fetch('/api/openai/v1/chat/completions', {
@@ -56,7 +61,7 @@ export async function validateDocument(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model,
         messages: [
           {
             role: 'system',
@@ -78,7 +83,7 @@ TAREFA OBRIGATÓRIA:
             role: 'user',
             content: [
               { type: 'text', text: `Analise este documento. Tipo esperado: ${docType}` },
-              { type: 'image_url', image_url: { url: fileUrl } }
+               { type: 'image_url', image_url: { url: imageUrl } }
             ]
           }
         ],

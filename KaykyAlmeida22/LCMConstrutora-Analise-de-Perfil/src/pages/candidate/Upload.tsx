@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import { validateDocument } from '../../services/aiValidation';
+import { imageToPdf, pdfToImage, fileToBase64 } from '../../services/pdfUtils';
 import { getRequiredDocuments, getDocumentName } from '../../services/documentRules';
 import type { Candidate, DocumentType, Document } from '../../types';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
@@ -58,16 +59,31 @@ export default function Upload() {
     setUploadingDocType(selectedDocType);
     
     try {
-      // 1. Upload to Storage
-      const extension = file.name.split('.').pop() || 'pdf';
-      const storagePath = `${selectedDocType}_${Date.now()}.${extension}`;
-      const publicUrl = await api.uploadFile(candidate.id, file, storagePath);
+      const isPdf = file.type === 'application/pdf';
+
+      // 1. Prepare the file for storage (always as PDF)
+      let fileToUpload: File | Blob;
+      let imageDataUrl: string;
+
+      if (isPdf) {
+        // PDF: upload original, render page 1 as image for GPT-5.1
+        fileToUpload = file;
+        imageDataUrl = await pdfToImage(file);
+      } else {
+        // Image: convert to PDF for storage, read base64 for GPT-4o
+        fileToUpload = await imageToPdf(file);
+        imageDataUrl = await fileToBase64(file);
+      }
+
+      // 2. Upload PDF to Storage (always .pdf extension)
+      const storagePath = `${selectedDocType}_${Date.now()}.pdf`;
+      const publicUrl = await api.uploadFile(candidate.id, fileToUpload as File, storagePath);
 
       if (!publicUrl) {
           throw new Error('Falha no upload do arquivo');
       }
 
-      // 2. Create entry in Database
+      // 3. Create entry in Database
       const newDoc: Partial<Document> = {
         candidato_id: candidate.id,
         tipo_documento: selectedDocType,
@@ -82,9 +98,13 @@ export default function Upload() {
       const createdDoc = await api.addDocument(newDoc);
 
       if (createdDoc && createdDoc.id) {
-          // 3. Trigger IA Validation (Simulation)
-          // Em produção, isso seria um webhook ou edge function.
-          const iaResult = await validateDocument(createdDoc.id, selectedDocType, publicUrl);
+          // 4. Trigger IA Validation with the correct model
+          const iaResult = await validateDocument(
+            createdDoc.id,
+            selectedDocType,
+            publicUrl,
+            { isPdf, imageDataUrl }
+          );
           
           await api.updateDocument(createdDoc.id, {
             status_ia: iaResult.isValid ? 'Aprovado' : 'Rejeitado',
