@@ -130,11 +130,11 @@ export default function Onboarding() {
 
         // Update status if it's blocking
         if (finalAnswers.financiamento_habitacional_pos_2005) {
-           await api.updateStatus(candidateId, 'subsidio_bloqueado', undefined, 'Benefício Habitacional após 16/05/2005 detectado na ficha.');
+           await api.updateStatus(candidateId, 'subsidio_bloqueado' as any, undefined, 'Benefício Habitacional após 16/05/2005 detectado na ficha.');
         } else if (finalAnswers.tipo_renda === 'Sem_renda') {
-           await api.updateStatus(candidateId, 'sem_renda_comprovavel', undefined, 'Candidato declarou não possuir renda na ficha.');
+           await api.updateStatus(candidateId, 'sem_renda_comprovavel' as any, undefined, 'Candidato declarou não possuir renda na ficha.');
         } else {
-           await api.updateStatus(candidateId, 'documentacao_pendente', undefined, 'Ficha cadastral preenchida com sucesso.');
+           await api.updateStatus(candidateId, 'documentacao_pendente' as any, undefined, 'Ficha cadastral preenchida com sucesso.');
         }
 
         if (isAdmin) {

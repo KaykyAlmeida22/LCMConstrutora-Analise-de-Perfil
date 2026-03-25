@@ -85,8 +85,10 @@ export default function Upload() {
           throw new Error('Falha no upload do arquivo');
       }
 
-      // 3. Create entry in Database
-      const newDoc: Partial<Document> = {
+      // 3. Create or Update entry in Database
+      const existingDoc = candidate.documentos?.find(d => d.tipo_documento === selectedDocType);
+      
+      const docData: Partial<Document> = {
         candidato_id: candidate.id,
         tipo_documento: selectedDocType,
         arquivo_url: publicUrl,
@@ -95,22 +97,29 @@ export default function Upload() {
         status_upload: 'Enviado',
         status_ia: 'Pendente',
         aprovado_pelo_analista: false,
+        motivo_rejeicao: '', // Clear old rejection
       };
 
-      const createdDoc = await api.addDocument(newDoc);
+      let currentDoc: Document | undefined;
 
-      if (createdDoc && createdDoc.id) {
+      if (existingDoc?.id) {
+        currentDoc = await api.updateDocument(existingDoc.id, docData);
+      } else {
+        currentDoc = await api.addDocument(docData);
+      }
+
+      if (currentDoc && currentDoc.id) {
           // 4. Trigger IA Validation with the correct model
           const iaResult = await validateDocument(
-            createdDoc.id,
+            currentDoc.id,
             selectedDocType,
             publicUrl,
             { isPdf, imageDataUrl }
           );
           
-          await api.updateDocument(createdDoc.id, {
+          await api.updateDocument(currentDoc.id, {
             status_ia: iaResult.isValid ? 'Aprovado' : 'Rejeitado',
-            status_upload: iaResult.isValid ? 'Enviado' : 'Rejeitado',  // Sync status_upload with AI result
+            status_upload: iaResult.isValid ? 'Enviado' : 'Rejeitado', 
             confianca_leitura_ia: iaResult.confidence,
             alertas_ia: {
                 issues: iaResult.issues,
@@ -352,8 +361,8 @@ export default function Upload() {
                   {doc.status_ia !== 'Pendente' && (
                     <div style={{ marginTop: '12px' }}>
                       
-                      {/* AI Reject Reason Alert */}
-                      {(doc.status_ia === 'Rejeitado' || doc.status_upload === 'Rejeitado') && doc.alertas_ia?.issues && doc.alertas_ia.issues.length > 0 && (
+                      {/* AI Reject Reason Alert - ONLY show if the overall status is still 'Rejeitado' */}
+                      {doc.status_upload === 'Rejeitado' && doc.alertas_ia?.issues && doc.alertas_ia.issues.length > 0 && (
                         <div style={{ 
                           marginBottom: '12px', 
                           padding: '10px 12px', 

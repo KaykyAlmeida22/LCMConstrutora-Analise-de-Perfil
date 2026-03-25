@@ -1,4 +1,4 @@
-import { DocumentType } from '../types';
+import type { DocumentType } from '../types';
 
 interface ValidationResult {
   documentId: string;
@@ -34,14 +34,14 @@ const DOC_TYPE_DESCRIPTIONS: Record<string, string> = {
 };
 
 const EXPIRY_RULES: Partial<Record<DocumentType, number>> = {
-  comprovante_residencia: 90,
+  comprovante_endereco: 60,
 };
 
 export async function validateDocument(
   documentId: string,
   docType: DocumentType,
   fileUrl: string,
-  options?: { isOriginalPdf?: boolean }
+  options?: { isPdf?: boolean; imageDataUrl?: string }
 ): Promise<ValidationResult> {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
@@ -51,13 +51,14 @@ export async function validateDocument(
   }
 
   const docDescription = DOC_TYPE_DESCRIPTIONS[docType] ?? docType;
+  const contentToAnalyze = options?.imageDataUrl || fileUrl;
   
-  // Model routing: 4.0 for images, 5.1 for PDFs
-  const model = options?.isOriginalPdf ? 'gpt-5.1' : 'gpt-4o';
+  // Using GPT-4o for all visual analysis
+  const model = 'gpt-4o';
   
   try {
-    // OpenAI Responses API is cheaper and supports native PDF reading
-    const response = await fetch('/api/openai/v1/responses', {
+    // Standard OpenAI Chat Completions API
+    const response = await fetch('/api/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -65,11 +66,14 @@ export async function validateDocument(
       },
       body: JSON.stringify({
         model,
-        input: [
+        messages: [
           {
-            type: 'text',
-            text: `Você é um perito em documentos brasileiros para financiamento habitacional.
-Assuma que o arquivo enviado é um PDF (mesmo que tenha sido convertido de imagem).
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: `Você é um perito em documentos brasileiros para financiamento habitacional.
+Analise a imagem enviada (que pode ser a primeira página de um PDF ou uma foto tirada pelo usuário).
 
 TIPO ESPERADO: ${docDescription}
 
@@ -77,7 +81,7 @@ Ações:
 1. Valide se o documento é do tipo correto.
 2. Extraia Nome, CPF, RG e Data de Emissão.
 3. Avalie qualidade e legibilidade (0-100).
-4. Retorne APENAS um JSON:
+4. Retorne APENAS um JSON plano com a estrutura:
 {
   "confidence": number,
   "qualityScore": number,
@@ -86,10 +90,12 @@ Ações:
   "issues": string[],
   "data_emissao": "DD/MM/YYYY" ou null
 }`
-          },
-          {
-            type: 'input_file',
-            input_file: { url: fileUrl }
+              },
+              {
+                type: 'image_url',
+                image_url: { url: contentToAnalyze }
+              }
+            ],
           }
         ],
         response_format: { type: 'json_object' }
@@ -97,11 +103,12 @@ Ações:
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI Resp Error: ${response.status}`);
+      const errText = await response.text();
+      throw new Error(`OpenAI Error: ${response.status} - ${errText}`);
     }
 
     const data = await response.json();
-    const rawContent = data.output?.text || data.text || '{}';
+    const rawContent = data.choices?.[0]?.message?.content || '{}';
     const resultJson = JSON.parse(rawContent);
 
     let isValid = resultJson.isCorrectDocumentType && resultJson.confidence > 75 && resultJson.qualityScore > 50;
@@ -111,10 +118,29 @@ Ações:
       issues.push(`Documento não parece ser um ${docType.replace('_', ' ')}.`);
     }
 
-    // Expiry check
-    let expiryCheck: any = undefined;
+    // Expiry check logic
+    let expiryCheck: ValidationResult['expiryCheck'] = undefined;
     if (EXPIRY_RULES[docType] && resultJson.data_emissao) {
-        // Logic for expiry...
+        const [day, month, year] = resultJson.data_emissao.split('/').map(Number);
+        const issueDate = new Date(year, month - 1, day);
+        const today = new Date();
+        const diffTime = Math.abs(today.getTime() - issueDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const limitDays = EXPIRY_RULES[docType]!;
+        
+        const isExpired = diffDays > limitDays;
+        expiryCheck = {
+            isExpired,
+            daysRemaining: limitDays - diffDays,
+            message: isExpired 
+                ? `Documento expirado em ${diffDays - limitDays} dias (Limite: ${limitDays} dias).`
+                : `Documento válido por mais ${limitDays - diffDays} dias.`
+        };
+
+        if (isExpired) {
+            isValid = false;
+            issues.push(expiryCheck.message);
+        }
     }
 
     return {
@@ -133,7 +159,7 @@ Ações:
   }
 }
 
-async function runMockValidation(id: string, type: string, error?: string): Promise<ValidationResult> {
+async function runMockValidation(id: string, _type: string, error?: string): Promise<ValidationResult> {
   await new Promise(r => setTimeout(r, 2000));
   return {
     documentId: id,

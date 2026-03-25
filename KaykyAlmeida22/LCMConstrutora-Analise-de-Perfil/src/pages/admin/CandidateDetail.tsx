@@ -580,12 +580,37 @@ export default function CandidateDetail() {
                       </div>
                     </div>
 
-                    {doc.alertas_ia && Object.keys(doc.alertas_ia).length > 0 && (
-                      <div style={{ marginTop: '8px' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '6px' }}>Alertas:</div>
-                        <pre style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', padding: '8px', borderRadius: '4px' }}>
-                          {JSON.stringify(doc.alertas_ia, null, 2)}
-                        </pre>
+                    {doc.alertas_ia && (
+                      <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {doc.alertas_ia.issues && doc.alertas_ia.issues.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--danger-500)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <AlertTriangle size={14} /> Problemas Identificados:
+                            </div>
+                            <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                              {doc.alertas_ia.issues.map((issue: string, idx: number) => (
+                                <li key={idx}>{issue}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {doc.alertas_ia.expiryCheck && (
+                          <div style={{ 
+                            padding: '8px 12px', 
+                            borderRadius: '8px', 
+                            background: doc.alertas_ia.expiryCheck.isExpired ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+                            border: `1px solid ${doc.alertas_ia.expiryCheck.isExpired ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`,
+                            fontSize: '0.82rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            color: doc.alertas_ia.expiryCheck.isExpired ? 'var(--danger-500)' : 'var(--success-500)'
+                          }}>
+                            {doc.alertas_ia.expiryCheck.isExpired ? <Ban size={16} /> : <CheckCircle size={16} />}
+                            {doc.alertas_ia.expiryCheck.message}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
