@@ -49,7 +49,7 @@ export default function NewCandidate() {
       });
 
       if (candidate) {
-        navigate(`/admin/candidato/${candidate.id}`);
+        navigate(`/onboarding?id=${candidate.id}&admin=true`);
       } else {
         alert('Erro ao criar candidato. Verifique se o CPF já existe.');
       }
@@ -141,7 +141,7 @@ export default function NewCandidate() {
             Cancelar
           </button>
           <button type="submit" className="btn btn-primary btn-lg" disabled={saving || !form.nome_completo.trim() || !form.cpf.trim()}>
-            {saving ? 'Cadastrando...' : '✅ Cadastrar Candidato'}
+            {saving ? 'Cadastrando...' : 'Continuar para Ficha Cadastral (11 Etapas) ➔'}
           </button>
         </div>
       </form>

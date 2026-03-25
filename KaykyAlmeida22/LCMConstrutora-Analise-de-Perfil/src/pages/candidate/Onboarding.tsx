@@ -44,6 +44,7 @@ const EMPTY_ANSWERS: FormAnswers = {
 export default function Onboarding() {
   const [searchParams] = useSearchParams();
   const candidateId = searchParams.get('id') || '';
+  const isAdmin = searchParams.get('admin') === 'true';
   const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -136,7 +137,11 @@ export default function Onboarding() {
            await api.updateStatus(candidateId, 'documentacao_pendente', undefined, 'Ficha cadastral preenchida com sucesso.');
         }
 
-        navigate(`/upload?id=${candidateId}`);
+        if (isAdmin) {
+          navigate(`/admin/candidato/${candidateId}`);
+        } else {
+          navigate(`/upload?id=${candidateId}`);
+        }
       } else {
         navigate('/');
       }

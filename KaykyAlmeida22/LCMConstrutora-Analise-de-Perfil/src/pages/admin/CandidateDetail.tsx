@@ -375,9 +375,17 @@ export default function CandidateDetail() {
               </div>
             </div>
           ) : (
-            <div className="alert alert-warning">
-              <span className="alert-icon"><FileWarning size={20} /></span>
-              <div>Ficha pré-cadastral ainda não foi preenchida por este candidato.</div>
+            <div className="alert alert-warning" style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' }}>
+              <div className="flex items-center gap-2">
+                <span className="alert-icon"><FileWarning size={20} /></span>
+                <div>Ficha pré-cadastral ainda não foi preenchida por este candidato.</div>
+              </div>
+              <button 
+                className="btn btn-primary btn-sm"
+                onClick={() => navigate(`/onboarding?id=${candidate.id}&admin=true`)}
+              >
+                Preencher Ficha Agora
+              </button>
             </div>
           )}
 
