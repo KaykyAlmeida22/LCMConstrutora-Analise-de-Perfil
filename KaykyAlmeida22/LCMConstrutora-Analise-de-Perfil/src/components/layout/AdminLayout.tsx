@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { LayoutDashboard, Users, UserPlus, Home, Menu, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, Home, Menu, LogOut, ChevronLeft } from 'lucide-react';
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -13,6 +13,12 @@ export default function AdminLayout() {
     await signOut();
     navigate('/admin/login');
   };
+
+  const navItems = [
+    { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/admin/candidatos', icon: Users, label: 'Candidatos' },
+    { to: '/admin/novo-candidato', icon: UserPlus, label: 'Novo Cadastro' },
+  ];
 
   return (
     <div className="layout-container">
@@ -26,143 +32,152 @@ export default function AdminLayout() {
 
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        {/* Logo Area */}
-        <div style={{ padding: sidebarCollapsed ? '24px 12px 0 12px' : '24px 24px 0 24px', marginBottom: '32px', transition: 'padding var(--transition-base)' }}>
-          <div
-            style={{
-              padding: sidebarCollapsed ? '12px' : '16px',
-              borderRadius: '16px',
-              background: 'var(--primary-600)',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-            }}
-          >
-            <img src="/logo.png" alt="LCM Construtora" style={{ height: '40px', objectFit: 'contain' }} />
+        {/* Logo */}
+        <div style={{
+          padding: sidebarCollapsed ? '20px 12px' : '20px 16px',
+          marginBottom: '8px',
+          transition: 'padding var(--transition-base)'
+        }}>
+          <div style={{
+            padding: sidebarCollapsed ? '10px' : '12px 16px',
+            borderRadius: 'var(--radius-lg)',
+            background: 'var(--primary-700)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <img src="/logo.png" alt="LCM" style={{ height: '32px', objectFit: 'contain' }} />
           </div>
         </div>
 
-          {/* Navigation */}
-          <nav style={{ flex: 1, padding: '0 24px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <div className="sidebar-text" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Menu Principal
+        {/* Section label */}
+        <div className="sidebar-text" style={{
+          fontSize: '0.6875rem',
+          fontWeight: 600,
+          color: 'rgba(255,255,255,0.35)',
+          padding: '0 20px',
+          marginBottom: '8px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em'
+        }}>
+          Menu
+        </div>
+
+        {/* Navigation */}
+        <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          {navItems.map(item => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+              onClick={() => window.innerWidth <= 1024 && setSidebarOpen(false)}
+            >
+              <item.icon size={18} className="sidebar-link-icon" />
+              <span className="sidebar-text">{item.label}</span>
+            </NavLink>
+          ))}
+
+          <div style={{ flex: 1 }} />
+
+          <NavLink
+            to="/"
+            className="sidebar-link"
+            style={{ marginTop: 'auto', opacity: 0.6 }}
+          >
+            <Home size={18} className="sidebar-link-icon" />
+            <span className="sidebar-text">Portal do Candidato</span>
+          </NavLink>
+        </nav>
+
+        {/* User / Logout */}
+        <div className="sidebar-footer" style={{ padding: sidebarCollapsed ? '16px 8px' : '16px' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginBottom: '12px',
+            justifyContent: sidebarCollapsed ? 'center' : 'flex-start'
+          }}>
+            <div style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              background: 'var(--primary-700)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              color: 'white',
+              flexShrink: 0
+            }}>
+              AC
             </div>
-            <NavLink
-              to="/admin/dashboard"
-              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-              onClick={() => window.innerWidth <= 1024 && setSidebarOpen(false)}
-            >
-              <LayoutDashboard size={18} className="sidebar-link-icon" />
-              <span className="sidebar-text">Dashboard Geral</span>
-            </NavLink>
-            <NavLink
-              to="/admin/candidatos"
-              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-              onClick={() => window.innerWidth <= 1024 && setSidebarOpen(false)}
-            >
-              <Users size={18} className="sidebar-link-icon" />
-              <span className="sidebar-text">Candidatos</span>
-            </NavLink>
-            <NavLink
-              to="/admin/novo-candidato"
-              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-              onClick={() => window.innerWidth <= 1024 && setSidebarOpen(false)}
-            >
-              <UserPlus size={18} className="sidebar-link-icon" />
-              <span className="sidebar-text">Novo Cadastro</span>
-            </NavLink>
-  
-            <div style={{ marginTop: 'auto' }} />
-  
-            <NavLink
-              to="/"
-              className="sidebar-link"
-              style={{ opacity: 0.7 }}
-            >
-              <Home size={18} className="sidebar-link-icon" />
-              <span className="sidebar-text">Área do Candidato</span>
-            </NavLink>
-          </nav>
-  
-          {/* User / Logout */}
-          <div className="sidebar-footer" style={{ padding: sidebarCollapsed ? '24px 12px' : '24px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-              <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: sidebarCollapsed ? 'center' : 'flex-start', gap: '12px' }}>
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, var(--primary-600), var(--primary-400))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    color: 'white',
-                    flexShrink: 0
-                  }}
-                >
-                  AC
-                </div>
-                <div className="sidebar-footer-text" style={{ overflow: 'hidden' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>Analista de Crédito</div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{user?.email || 'eq.lcm'}</div>
-                </div>
+            <div className="sidebar-footer-text" style={{ overflow: 'hidden', minWidth: 0 }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                Analista
               </div>
-              
-              <button
-                className="btn btn-ghost"
-                style={{ 
-                  width: '100%', 
-                  background: 'var(--bg-tertiary)', 
-                  color: 'var(--text-secondary)',
-                  borderRadius: '12px',
-                  padding: '10px',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}
-                onClick={handleLogout}
-              >
-                {sidebarCollapsed ? <LogOut size={18} /> : 'Sair do Sistema'}
-              </button>
-            </div>
-          </div>
-        </aside>
-  
-        {/* Main Content Area */}
-        <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
-          <header className="main-header">
-            <div className="flex items-center gap-4">
-              <button
-                className="btn btn-ghost btn-icon"
-                onClick={() => {
-                  if (window.innerWidth <= 1024) {
-                    setSidebarOpen(!sidebarOpen);
-                  } else {
-                    setSidebarCollapsed(!sidebarCollapsed);
-                  }
-                }}
-              >
-                <Menu size={20} />
-              </button>
-              <div className="main-header-title" id="page-title" />
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+              <div style={{ fontSize: '0.6875rem', color: 'var(--sidebar-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user?.email || 'eq.lcm'}
               </div>
             </div>
-          </header>
-  
-          <div className="main-body">
-            <Outlet />
           </div>
-        </main>
-      </div>
-    );
-  }
+
+          <button
+            style={{
+              width: '100%',
+              padding: '8px',
+              borderRadius: 'var(--radius-md)',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'var(--sidebar-text)',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              transition: 'background var(--transition-fast)'
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+            onClick={handleLogout}
+          >
+            <LogOut size={14} />
+            {!sidebarCollapsed && 'Sair'}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
+        <header className="main-header">
+          <div className="flex items-center gap-3">
+            <button
+              className="btn btn-ghost btn-icon"
+              onClick={() => {
+                if (window.innerWidth <= 1024) {
+                  setSidebarOpen(!sidebarOpen);
+                } else {
+                  setSidebarCollapsed(!sidebarCollapsed);
+                }
+              }}
+              style={{ color: 'var(--text-muted)' }}
+            >
+              {sidebarCollapsed ? <Menu size={18} /> : <ChevronLeft size={18} />}
+            </button>
+          </div>
+
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+            {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </div>
+        </header>
+
+        <div className="main-body">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  );
+}

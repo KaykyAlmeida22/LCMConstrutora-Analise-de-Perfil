@@ -9,7 +9,7 @@ import { supabase } from '../../lib/supabase';
 import { getRequiredDocuments } from '../../services/documentRules';
 import { 
   FileText, Search, AlertTriangle, CheckCircle, Ban, Wallet, 
-  Users, Plus, FolderOpen 
+  Users, Plus, FolderOpen, ArrowRight
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -23,7 +23,6 @@ export default function Dashboard() {
   useEffect(() => {
     loadData();
 
-    // Setup realtime subscription
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -63,60 +62,54 @@ export default function Dashboard() {
   if (loading) return <LoadingSpinner size="lg" />;
 
   const statCards: { key: CandidateStatus; icon: React.ReactNode }[] = [
-    { key: 'documentacao_pendente', icon: <FileText size={24} /> },
-    { key: 'em_analise', icon: <Search size={24} /> },
-    { key: 'aguardando_correcao', icon: <AlertTriangle size={24} /> },
-    { key: 'aprovado', icon: <CheckCircle size={24} /> },
-    { key: 'subsidio_bloqueado', icon: <Ban size={24} /> },
-    { key: 'sem_renda_comprovavel', icon: <Wallet size={24} /> },
+    { key: 'documentacao_pendente', icon: <FileText size={20} /> },
+    { key: 'em_analise', icon: <Search size={20} /> },
+    { key: 'aguardando_correcao', icon: <AlertTriangle size={20} /> },
+    { key: 'aprovado', icon: <CheckCircle size={20} /> },
+    { key: 'subsidio_bloqueado', icon: <Ban size={20} /> },
+    { key: 'sem_renda_comprovavel', icon: <Wallet size={20} /> },
   ];
 
   const totalCandidates = candidates.length;
 
   return (
     <div className="animate-fadeIn">
-      {/* Page Title */}
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '4px' }}>
+      {/* Page header */}
+      <div style={{ marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '4px', letterSpacing: '-0.02em' }}>
           Painel de Análise
         </h1>
-        <p className="text-muted">
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
           Acompanhe o status dos candidatos ao programa Minha Casa Minha Vida.
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="stats-grid" style={{ marginBottom: '32px' }}>
-        {/* Total card */}
-        <div className="stat-card" style={{ borderColor: 'var(--primary-500)', borderWidth: '1px' }}>
-          <div
-            className="stat-icon"
-            style={{
-              background: 'linear-gradient(135deg, var(--primary-600), var(--primary-700))',
-              color: 'white',
-              boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.1)'
-            }}
-          >
-            <Users size={24} />
+      {/* Stats */}
+      <div className="stats-grid" style={{ marginBottom: '24px' }}>
+        {/* Total */}
+        <div className="stat-card" style={{ borderLeft: '3px solid var(--primary-600)' }}>
+          <div className="stat-icon" style={{ background: 'rgba(140, 198, 63, 0.1)', color: 'var(--primary-600)' }}>
+            <Users size={20} />
           </div>
           <div>
-            <div className="stat-value" style={{ color: 'var(--primary-400)' }}>
-              {totalCandidates}
-            </div>
-            <div className="stat-label">Total de Candidatos</div>
+            <div className="stat-value" style={{ color: 'var(--primary-700)' }}>{totalCandidates}</div>
+            <div className="stat-label">Total</div>
           </div>
         </div>
         {statCards.map((sc) => (
           <div
             key={sc.key}
             className="stat-card"
-            style={{ cursor: 'pointer' }}
+            style={{
+              cursor: 'pointer',
+              borderLeft: statusFilter === sc.key ? `3px solid ${STATUS_COLORS[sc.key]}` : '3px solid transparent'
+            }}
             onClick={() => setStatusFilter(statusFilter === sc.key ? '' : sc.key)}
           >
             <div
               className="stat-icon"
               style={{
-                background: `${STATUS_COLORS[sc.key]}18`,
+                background: `${STATUS_COLORS[sc.key]}14`,
                 color: STATUS_COLORS[sc.key],
               }}
             >
@@ -130,32 +123,20 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Filtro e Busca com botão lado a lado (estilo novo) */}
+      {/* Search + Actions */}
       <div
-        className="flex items-center justify-between gap-4"
-        style={{ marginBottom: '24px', flexWrap: 'wrap' }}
+        className="flex items-center justify-between"
+        style={{ marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}
       >
-        <div 
-          className="search-input-wrapper" 
-          style={{ 
-            flex: 1, 
-            maxWidth: '500px', 
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
-          <span style={{ position: 'absolute', left: '16px', color: 'var(--text-muted)' }}><Search size={18} /></span>
+        <div style={{ position: 'relative', flex: 1, maxWidth: '380px' }}>
+          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)' }}>
+            <Search size={16} />
+          </span>
           <input
             className="form-input"
             style={{
-              paddingLeft: '44px',
-              height: '48px',
-              borderRadius: '12px',
-              background: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-default)',
-              boxShadow: 'none',
-              fontSize: '0.9rem'
+              paddingLeft: '36px',
+              fontSize: '0.8125rem',
             }}
             placeholder="Buscar por nome ou CPF..."
             value={search}
@@ -164,30 +145,22 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {statusFilter && (
             <button
               className="btn btn-ghost btn-sm"
               onClick={() => setStatusFilter('')}
+              style={{ fontSize: '0.75rem' }}
             >
               ✕ Limpar filtro
             </button>
           )}
           <button
             className="btn btn-primary"
-            style={{ 
-              height: '48px', 
-              padding: '0 24px', 
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
-              boxShadow: '0 4px 16px rgba(6, 182, 212, 0.3)',
-              fontSize: '0.95rem',
-              fontWeight: 600
-            }}
             onClick={() => navigate('/admin/novo-candidato')}
             id="btn-new-candidate"
           >
-            <Plus size={18} /> Novo Candidato
+            <Plus size={16} /> Novo Candidato
           </button>
         </div>
       </div>
@@ -202,24 +175,24 @@ export default function Dashboard() {
               <th>Status</th>
               <th>Documentos</th>
               <th>Atualizado</th>
-              <th>Ações</th>
+              <th style={{ width: '100px' }}>Ações</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={6}>
-                  <div className="empty-state" style={{ padding: '64px 24px', textAlign: 'center' }}>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-                      <FolderOpen size={48} strokeWidth={1} />
+                  <div className="empty-state" style={{ padding: '48px 24px' }}>
+                    <div style={{ color: 'var(--gray-400)', marginBottom: '12px' }}>
+                      <FolderOpen size={40} strokeWidth={1.5} />
                     </div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                    <div className="empty-state-title">
                       Nenhum candidato encontrado
                     </div>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                    <div className="empty-state-text">
                       {search || statusFilter
-                        ? 'Tente alterar os filtros de busca para encontrar o que procura.'
-                        : 'Clique no botão "Novo Candidato" ali em cima para começar.'}
+                        ? 'Tente alterar os filtros de busca.'
+                        : 'Clique em "Novo Candidato" para começar.'}
                     </div>
                   </div>
                 </td>
@@ -238,75 +211,70 @@ export default function Dashboard() {
                     onClick={() => navigate(`/admin/candidato/${c.id}`)}
                   >
                     <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div
-                          style={{
-                            width: 38,
-                            height: 38,
-                            borderRadius: '50%',
-                            background: `linear-gradient(135deg, ${STATUS_COLORS[c.status as CandidateStatus]}40, ${STATUS_COLORS[c.status as CandidateStatus]}15)`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '0.85rem',
-                            fontWeight: 700,
-                            color: STATUS_COLORS[c.status as CandidateStatus],
-                            flexShrink: 0,
-                          }}
-                        >
-                          {c.nome_completo.charAt(0)}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{
+                          width: 34,
+                          height: 34,
+                          borderRadius: '50%',
+                          background: `${STATUS_COLORS[c.status as CandidateStatus]}12`,
+                          border: `1.5px solid ${STATUS_COLORS[c.status as CandidateStatus]}30`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          color: STATUS_COLORS[c.status as CandidateStatus],
+                          flexShrink: 0,
+                        }}>
+                          {c.nome_completo.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{c.nome_completo}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            {c.telefone}
-                          </div>
+                          <div style={{ fontWeight: 600, fontSize: '0.875rem', lineHeight: 1.3 }}>{c.nome_completo}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{c.telefone}</div>
                         </div>
                       </div>
                     </td>
-                    <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{c.cpf}</td>
+                    <td style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                      {c.cpf}
+                    </td>
                     <td><StatusBadge status={c.status as CandidateStatus} /></td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div
-                          style={{
-                            width: '60px',
-                            height: '5px',
-                            background: 'var(--bg-tertiary)',
-                            borderRadius: '999px',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: docsRequired > 0 ? `${Math.min((docsUploaded / docsRequired) * 100, 100)}%` : '0%',
-                              height: '100%',
-                              background: docsUploaded >= docsRequired && docsRequired > 0
-                                ? 'var(--success-500)'
-                                : 'var(--primary-500)',
-                              borderRadius: '999px',
-                              transition: 'width 0.4s ease',
-                            }}
-                          />
+                        <div style={{
+                          width: '50px',
+                          height: '4px',
+                          background: 'var(--gray-100)',
+                          borderRadius: 'var(--radius-full)',
+                          overflow: 'hidden',
+                        }}>
+                          <div style={{
+                            width: docsRequired > 0 ? `${Math.min((docsUploaded / docsRequired) * 100, 100)}%` : '0%',
+                            height: '100%',
+                            background: docsUploaded >= docsRequired && docsRequired > 0
+                              ? 'var(--success-500)'
+                              : 'var(--primary-500)',
+                            borderRadius: 'var(--radius-full)',
+                            transition: 'width 0.3s ease',
+                          }} />
                         </div>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
                           {docsUploaded}/{docsRequired}
                         </span>
                       </div>
                     </td>
-                    <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       {new Date(c.updated_at).toLocaleDateString('pt-BR')}
                     </td>
                     <td>
                       <button
-                        className="btn btn-outline btn-sm"
-                        style={{ borderRadius: '99px', fontSize: '0.75rem', padding: '6px 16px', borderColor: 'var(--border-hover)' }}
+                        className="btn btn-ghost btn-sm"
+                        style={{ fontSize: '0.75rem', color: 'var(--primary-600)', fontWeight: 500 }}
                         onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/admin/candidato/${c.id}`);
                         }}
                       >
-                        Ver detalhes
+                        Ver <ArrowRight size={12} />
                       </button>
                     </td>
                   </tr>

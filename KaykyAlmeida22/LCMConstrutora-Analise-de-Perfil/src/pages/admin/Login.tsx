@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
-import { BackgroundPaths } from '../../components/ui/BackgroundPaths';
+import { Lock, Mail, ShieldCheck } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -10,6 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -30,240 +31,361 @@ export default function Login() {
 
     if (signInError) {
       if (signInError.message.includes('Invalid login credentials')) {
-        setError('E-mail corporativo ou senha inválidos.');
+        setError('E-mail ou senha inválidos.');
       } else {
-        setError('Ocorreu um erro ao tentar acessar. Tente novamente.');
+        setError('Ocorreu um erro. Tente novamente.');
       }
     } else {
-      // Login successful
       navigate('/admin/dashboard');
     }
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        color: '#1a1a1a', // Adjusting specifically for this bright UI card
-      }}
-    >
-      {/* Animated LCM Background */}
-      <BackgroundPaths />
+    <div style={{
+      display: 'flex',
+      minHeight: '100vh',
+      background: '#ffffff',
+    }}>
 
-      {/* Top Left Logo */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '32px',
-          left: '40px',
-        }}
+      {/* Left Side — Image Panel */}
+      <div style={{
+        width: '50%',
+        minHeight: '100vh',
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'none',
+      }}
+        className="login-left-panel"
       >
-        <img src="/logo.png" alt="LCM Construtora" style={{ height: '48px', objectFit: 'contain' }} />
+        {/* Dark overlay with gradient */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(135deg, rgba(17, 24, 39, 0.92) 0%, rgba(17, 24, 39, 0.75) 50%, rgba(93, 135, 39, 0.6) 100%)',
+          zIndex: 2,
+        }} />
+
+        {/* Background image */}
+        <img
+          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80"
+          alt="Construção"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            position: 'absolute',
+            inset: 0,
+            zIndex: 1,
+          }}
+        />
+
+        {/* Content over image */}
+        <div style={{
+          position: 'relative',
+          zIndex: 3,
+          padding: '48px',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+        }}>
+          {/* Logo */}
+          <div>
+            <img src="/logo.png" alt="LCM Construtora" style={{ height: '48px', objectFit: 'contain' }} />
+          </div>
+
+          {/* Central branding */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', maxWidth: '400px' }}>
+            <div style={{
+              width: 52,
+              height: 52,
+              borderRadius: '14px',
+              background: 'rgba(140, 198, 63, 0.2)',
+              border: '1px solid rgba(140, 198, 63, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '24px',
+            }}>
+              <ShieldCheck size={26} style={{ color: 'var(--primary-400)' }} />
+            </div>
+
+            <h2 style={{
+              fontSize: '2rem',
+              fontWeight: 800,
+              color: '#ffffff',
+              lineHeight: 1.2,
+              marginBottom: '16px',
+              letterSpacing: '-0.02em',
+            }}>
+              Análise de Crédito
+              <br />
+              <span style={{ color: 'var(--primary-400)' }}>Minha Casa, Minha Vida</span>
+            </h2>
+            <p style={{
+              fontSize: '0.95rem',
+              color: 'rgba(255, 255, 255, 0.6)',
+              lineHeight: 1.7,
+              maxWidth: '360px',
+            }}>
+              Plataforma segura para gestão e análise de candidatos ao programa habitacional federal.
+            </p>
+          </div>
+
+
+        </div>
       </div>
 
-      {/* Login Card */}
-      <div
-        style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          padding: '48px 40px',
-          width: '100%',
-          maxWidth: '460px',
-          boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.1)',
-          border: '1px solid #e2e8f0',
-          position: 'relative',
-          zIndex: 1,
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px', lineHeight: 1.2 }}>
-            Análise de Crédito LCM
-          </h1>
-          <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: 1.5 }}>
-            (<strong>Uso Restrito</strong>)
-          </p>
+      {/* Right Side — Login Form */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px 24px',
+        background: 'var(--bg-secondary)',
+        position: 'relative',
+      }}>
+        {/* Mobile-only logo */}
+        <div className="login-mobile-logo" style={{
+          position: 'absolute',
+          top: '24px',
+          left: '24px',
+          display: 'none',
+        }}>
+          <img src="/logo.png" alt="LCM" style={{ height: '36px', objectFit: 'contain' }} />
         </div>
 
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form
+          onSubmit={handleLogin}
+          style={{
+            width: '100%',
+            maxWidth: '380px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <h2 style={{
+            fontSize: '2rem',
+            fontWeight: 800,
+            color: 'var(--text-primary)',
+            marginBottom: '6px',
+            letterSpacing: '-0.02em',
+          }}>
+            Acessar Painel
+          </h2>
+          <p style={{
+            fontSize: '0.875rem',
+            color: 'var(--text-muted)',
+            marginBottom: '32px',
+          }}>
+            Bem-vindo! Faça login para continuar
+          </p>
+
+          {/* Error */}
           {error && (
-            <div
-              style={{
-                backgroundColor: '#fee2e2',
-                color: '#b91c1c',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                fontSize: '0.9rem',
-                fontWeight: 500,
-              }}
-            >
+            <div style={{
+              width: '100%',
+              padding: '10px 14px',
+              borderRadius: 'var(--radius-md)',
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#991b1b',
+              fontSize: '0.8125rem',
+              marginBottom: '20px',
+            }}>
               {error}
             </div>
           )}
 
-          <div>
-            <label
+          {/* Divider */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            width: '100%',
+            marginBottom: '24px',
+          }}>
+            <div style={{ flex: 1, height: '1px', background: 'var(--gray-200)' }} />
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+              credenciais corporativas
+            </span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--gray-200)' }} />
+          </div>
+
+          {/* Email */}
+          <div style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            background: 'transparent',
+            border: '1.5px solid var(--gray-200)',
+            height: '48px',
+            borderRadius: 'var(--radius-full)',
+            overflow: 'hidden',
+            paddingLeft: '20px',
+            gap: '10px',
+            marginBottom: '16px',
+            transition: 'border-color 0.15s ease',
+          }}>
+            <Mail size={16} style={{ color: 'var(--gray-400)', flexShrink: 0 }} />
+            <input
+              type="email"
+              placeholder="E-mail corporativo"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              required
               style={{
-                display: 'block',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                color: '#1e293b',
-                marginBottom: '8px',
+                background: 'transparent',
+                color: 'var(--text-primary)',
+                outline: 'none',
+                fontSize: '0.875rem',
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                fontFamily: 'inherit',
               }}
-            >
-              E-mail Corporativo
-            </label>
-            <div style={{ position: 'relative' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#94a3b8',
-                }}
-              >
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <input
-                type="email"
-                placeholder="ex: nome@lcmconstrutora.com.br"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 12px 12px 40px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.95rem',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  color: '#0f172a',
-                  backgroundColor: '#ffffff',
-                }}
-                disabled={loading}
-              />
-            </div>
+            />
           </div>
 
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <label
-                style={{
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  color: '#1e293b',
-                }}
-              >
-                Senha
+          {/* Password */}
+          <div style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            background: 'transparent',
+            border: '1.5px solid var(--gray-200)',
+            height: '48px',
+            borderRadius: 'var(--radius-full)',
+            overflow: 'hidden',
+            paddingLeft: '20px',
+            gap: '10px',
+            transition: 'border-color 0.15s ease',
+          }}>
+            <Lock size={16} style={{ color: 'var(--gray-400)', flexShrink: 0 }} />
+            <input
+              type="password"
+              placeholder="Senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              required
+              style={{
+                background: 'transparent',
+                color: 'var(--text-primary)',
+                outline: 'none',
+                fontSize: '0.875rem',
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                fontFamily: 'inherit',
+              }}
+            />
+          </div>
+
+          {/* Remember + Forgot */}
+          <div style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: '20px',
+            color: 'var(--text-muted)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                style={{ width: '16px', height: '16px', accentColor: 'var(--primary-600)', cursor: 'pointer' }}
+              />
+              <label htmlFor="remember" style={{ fontSize: '0.8125rem', cursor: 'pointer' }}>
+                Lembrar de mim
               </label>
-              <button
-                type="button"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--primary-600)',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  padding: 0,
-                }}
-                onClick={() => alert('Contate o administrador do sistema para redefinir sua senha.')}
-              >
-                Esqueci a senha
-              </button>
             </div>
-            <div style={{ position: 'relative' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#94a3b8',
-                }}
-              >
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <input
-                type="password"
-                placeholder="Sua senha corporativa"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 12px 12px 40px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.95rem',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  color: '#0f172a',
-                  backgroundColor: '#ffffff',
-                }}
-                disabled={loading}
-              />
-            </div>
+            <button
+              type="button"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--primary-600)',
+                fontSize: '0.8125rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                padding: 0,
+              }}
+              onClick={() => alert('Contate o administrador para redefinir sua senha.')}
+            >
+              Esqueceu a senha?
+            </button>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
             style={{
-              marginTop: '12px',
+              marginTop: '28px',
               width: '100%',
-              padding: '14px',
-              backgroundColor: 'var(--primary-600)',
-              color: 'white',
+              height: '48px',
+              borderRadius: 'var(--radius-full)',
+              color: '#ffffff',
+              background: 'var(--primary-600)',
               border: 'none',
-              borderRadius: '8px',
-              fontWeight: 700,
-              fontSize: '1rem',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
               cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.8 : 1,
-              transition: 'background-color 0.2s',
+              opacity: loading ? 0.7 : 1,
+              transition: 'opacity 0.15s ease, background 0.15s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              boxShadow: '0 4px 12px rgba(140, 198, 63, 0.3)'
+              fontFamily: 'inherit',
             }}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.9'; }}
+            onMouseLeave={e => { if (!loading) e.currentTarget.style.opacity = '1'; }}
           >
-            {loading ? <LoadingSpinner size="sm" /> : 'Acessar Painel do Analista \u2192'}
+            {loading ? <LoadingSpinner size="sm" /> : 'Acessar Painel'}
           </button>
-        </form>
 
-        <div style={{ marginTop: '32px', textAlign: 'center' }}>
-          <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5, marginBottom: '16px' }}>
-            Este acesso é exclusivo para colaboradores autorizados da equipe de
-            crédito LCM. Todos os acessos são monitorados.
+          <p style={{
+            fontSize: '0.8125rem',
+            color: 'var(--text-muted)',
+            marginTop: '20px',
+            textAlign: 'center',
+            lineHeight: 1.5,
+          }}>
+            Acesso exclusivo para colaboradores autorizados.
+            <br />
+            Todos os acessos são monitorados.
           </p>
-          <a
-            href="#"
-            style={{
-              fontSize: '0.85rem',
-              color: 'var(--primary-600)',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-            }}
-          >
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Ajuda para acesso
-          </a>
-        </div>
+        </form>
       </div>
+
+      {/* Responsive CSS injected via style tag */}
+      <style>{`
+        @media (min-width: 768px) {
+          .login-left-panel {
+            display: block !important;
+          }
+          .login-mobile-logo {
+            display: none !important;
+          }
+        }
+        @media (max-width: 767px) {
+          .login-left-panel {
+            display: none !important;
+          }
+          .login-mobile-logo {
+            display: block !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

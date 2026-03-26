@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
+import { ArrowLeft } from 'lucide-react';
 
 export default function NewCandidate() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function NewCandidate() {
     cpf: '',
     telefone: '',
     endereco: '',
-    municipio_projeto: 'Extrema', // Padrão Extrema
+    municipio_projeto: 'Extrema',
   });
 
   function formatCPF(value: string): string {
@@ -62,23 +63,23 @@ export default function NewCandidate() {
   }
 
   return (
-    <div className="animate-fadeIn" style={{ maxWidth: '700px' }}>
+    <div className="animate-fadeIn" style={{ maxWidth: '640px' }}>
       <button
         className="btn btn-ghost btn-sm"
         onClick={() => navigate('/admin')}
-        style={{ marginBottom: '16px' }}
+        style={{ marginBottom: '16px', fontSize: '0.8rem' }}
       >
-        ← Voltar ao Painel
+        <ArrowLeft size={14} /> Voltar
       </button>
 
-      <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '4px' }}>
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '4px' }}>
         Novo Candidato
       </h1>
-      <p className="text-muted" style={{ marginBottom: '32px' }}>
-        Cadastre as informações básicas para iniciar o processo pré-cadastral.
+      <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '24px' }}>
+        Cadastre as informações básicas para iniciar o processo.
       </p>
 
-      <form onSubmit={handleSubmit} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <form onSubmit={handleSubmit} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div className="form-group">
           <label className="form-label">Nome Completo *</label>
           <input
@@ -90,7 +91,7 @@ export default function NewCandidate() {
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <div className="form-group">
             <label className="form-label">CPF *</label>
             <input
@@ -113,7 +114,7 @@ export default function NewCandidate() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Endereço (Opcional no cadastro inicial)</label>
+          <label className="form-label">Endereço (Opcional)</label>
           <input
             className="form-input"
             placeholder="Rua, Número, Bairro..."
@@ -136,12 +137,12 @@ export default function NewCandidate() {
           </select>
         </div>
 
-        <div className="flex justify-between" style={{ marginTop: '12px' }}>
+        <div className="flex justify-between" style={{ marginTop: '8px' }}>
           <button type="button" className="btn btn-ghost" onClick={() => navigate('/admin')}>
             Cancelar
           </button>
-          <button type="submit" className="btn btn-primary btn-lg" disabled={saving || !form.nome_completo.trim() || !form.cpf.trim()}>
-            {saving ? 'Cadastrando...' : 'Continuar para Ficha Cadastral (11 Etapas) ➔'}
+          <button type="submit" className="btn btn-primary" disabled={saving || !form.nome_completo.trim() || !form.cpf.trim()}>
+            {saving ? 'Cadastrando...' : 'Continuar para Ficha Cadastral →'}
           </button>
         </div>
       </form>

@@ -104,47 +104,90 @@ export const api = {
   // === FICHAS CADASTRAIS ===
 
   async saveFormAnswers(id: string, answers: FormAnswers): Promise<Candidate | undefined> {
-    const { dependentes, financiamento_habitacional_pos_2005, ...restFichaData } = answers;
+    const { 
+        dependentes, 
+        financiamento_habitacional_pos_2005, 
+        nome_completo,
+        cpf,
+        telefone,
+        endereco,
+        municipio_projeto,
+        narrativa_renda,
+        candidato_id,
+        created_at,
+        updated_at,
+        ...restFichaData 
+    } = answers as any;
     
-    // Convert empty strings to null for DATE fields to prevent PostgreSQL syntax errors
+    // Explicit list of allowed columns for fichas_cadastrais to prevent any PG errors
+    const allowedFichaColumns = [
+        'tipo_residencia', 'valor_aluguel', 'teve_imovel_anterior', 'venda_registrada_cartorio',
+        'escolaridade', 'estado_civil', 'regime_bens', 'data_casamento', 'tem_dependentes',
+        'tem_financiamento_habitacional', 'data_contrato_habitacional', 'tem_financiamento_estudantil',
+        'financiamento_estudantil_em_atraso', 'tem_veiculo', 'valor_mercado_veiculo',
+        'veiculo_financiado', 'prestacao_veiculo', 'parcelas_restantes_veiculo',
+        'tem_cartao_credito', 'bandeira_cartao', 'tem_imovel', 'valor_mercado_imovel',
+        'declara_ir', 'tem_conta_corrente', 'banco_conta_corrente', 'limite_cheque_especial',
+        'tem_poupanca_aplicacao', 'comprova_36_meses_fgts', 'fara_uso_fgts',
+        'tipo_renda', 'faixa_renda', 'trabalha_aplicativo'
+    ];
+
+    const fichaData: any = { candidato_id: id };
+    allowedFichaColumns.forEach(col => {
+        if (restFichaData[col] !== undefined) {
+            fichaData[col] = restFichaData[col];
+        }
+    });
+
+    // Convert empty strings to null for DATE fields
     const sanitizeDate = (val: string | undefined | null) => val === '' ? null : val;
-    const sanitizedFicha = {
-        ...restFichaData,
-        candidato_id: id,
-        data_casamento: sanitizeDate(answers.data_casamento),
-        data_contrato_habitacional: sanitizeDate(answers.data_contrato_habitacional)
-    };
+    if (fichaData.data_casamento !== undefined) fichaData.data_casamento = sanitizeDate(fichaData.data_casamento);
+    if (fichaData.data_contrato_habitacional !== undefined) fichaData.data_contrato_habitacional = sanitizeDate(fichaData.data_contrato_habitacional);
     
-    // Save Ficha
+    // 1. Save Ficha
     const { error: fichaError } = await supabase
       .from('fichas_cadastrais')
-      .upsert(sanitizedFicha);
+      .upsert(fichaData);
 
     if (fichaError) {
-      console.error('Error saving form answers:', fichaError);
+      console.error('Error saving ficha:', fichaError);
       return undefined;
     }
 
-    // Sync core candidate data
+    // 2. Sync core candidate data
     const candidateData = {
-        nome_completo: answers.nome_completo,
-        cpf: answers.cpf,
-        telefone: answers.telefone,
-        endereco: answers.endereco,
-        municipio_projeto: answers.municipio_projeto
+        nome_completo,
+        cpf,
+        telefone,
+        endereco,
+        municipio_projeto,
+        narrativa_renda
     };
 
-    // Only update if at least one field is present
-    if (Object.values(candidateData).some(v => v !== undefined)) {
-        await supabase.from('candidatos').update(candidateData).eq('id', id);
+    // Filter candidate update to only existing values
+    const cleanedCandidateData = Object.fromEntries(
+        Object.entries(candidateData).filter(([_, v]) => v !== undefined)
+    );
+
+    if (Object.keys(cleanedCandidateData).length > 0) {
+        const { error: candError } = await supabase.from('candidatos').update(cleanedCandidateData).eq('id', id);
+        if (candError) {
+          console.error('Error updating candidate core data:', candError);
+          // We continue but log it
+        }
     }
 
-    // Save Dependents
-    if (dependentes && dependentes.length > 0) {
+    // 3. Save Dependents
+    if (dependentes && Array.isArray(dependentes)) {
       // Clear old dependents first
       await supabase.from('dependentes').delete().eq('candidato_id', id);
-      const depsWithCandidateId = dependentes.map(dep => ({ ...dep, candidato_id: id }));
-      await supabase.from('dependentes').insert(depsWithCandidateId);
+      if (dependentes.length > 0) {
+        const depsWithCandidateId = dependentes.map(dep => {
+            const { id: depId, created_at: dCa, ...restDep } = dep as any;
+            return { ...restDep, candidato_id: id };
+        });
+        await supabase.from('dependentes').insert(depsWithCandidateId);
+      }
     }
 
     return this.updateCandidate(id, { status: 'documentacao_pendente' });

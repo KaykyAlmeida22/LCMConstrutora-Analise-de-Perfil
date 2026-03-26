@@ -24,17 +24,17 @@ const FORM_ANSWER_LABELS: Record<string, string> = {
   tem_dependentes: 'Possui Dependentes',
   tem_financiamento_habitacional: 'Financ. Habitacional',
   data_contrato_habitacional: 'Data Contrato financ.',
-  financiamento_habitacional_pos_2005: 'Financ. Hab. Pós 2005 (Bloqueante)',
+  financiamento_habitacional_pos_2005: 'Financ. Hab. Pós 2005',
   tem_financiamento_estudantil: 'Financ. Estudantil',
   financiamento_estudantil_em_atraso: 'Financ. Estudantil em Atraso',
   tem_veiculo: 'Possui Veículo',
   valor_mercado_veiculo: 'Valor Mercado Veíc.',
   veiculo_financiado: 'Veículo Financiado',
-  prestacao_veiculo: 'Prestação Veí.',
-  parcelas_restantes_veiculo: 'Parcelas Restantes veíc.',
+  prestacao_veiculo: 'Prestação Veíc.',
+  parcelas_restantes_veiculo: 'Parcelas Restantes',
   tem_cartao_credito: 'Cartão Crédito',
   bandeira_cartao: 'Bandeira Cartão',
-  tem_imovel: 'Possui Imóvel Atual',
+  tem_imovel: 'Possui Imóvel',
   valor_mercado_imovel: 'Valor Imóvel',
   declara_ir: 'Declara IR',
   tem_conta_corrente: 'Conta Corrente',
@@ -89,7 +89,6 @@ export default function CandidateDetail() {
       status: newStatus,
       observacoes_analista: observations,
     });
-    // Log history
     await api.updateStatus(candidate.id, newStatus, undefined, 'Status alterado manualmente pelo analista');
     await loadCandidate();
     setSaving(false);
@@ -102,11 +101,6 @@ export default function CandidateDetail() {
       aprovado_pelo_analista: action === 'Aprovado',
       motivo_rejeicao: reason || ''
     });
-    
-    // Auto status check for overall progression if needed
-    // Example: If all are approved, Candidate status -> 'aprovado'
-    // But for now, just reload
-    
     await loadCandidate();
   }
 
@@ -131,11 +125,9 @@ export default function CandidateDetail() {
   if (!candidate) {
     return (
       <div className="empty-state">
-        <div style={{ color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-          <XCircle size={48} strokeWidth={1} />
-        </div>
+        <XCircle size={40} strokeWidth={1.5} style={{ color: 'var(--gray-400)', marginBottom: '12px' }} />
         <div className="empty-state-title">Candidato não encontrado</div>
-        <button className="btn btn-primary" onClick={() => navigate('/admin')}>
+        <button className="btn btn-primary" onClick={() => navigate('/admin')} style={{ marginTop: '16px' }}>
           Voltar ao Painel
         </button>
       </div>
@@ -160,36 +152,35 @@ export default function CandidateDetail() {
         <button
           className="btn btn-ghost btn-sm"
           onClick={() => navigate('/admin/candidatos')}
-          style={{ marginBottom: '16px' }}
+          style={{ marginBottom: '16px', fontSize: '0.8rem' }}
         >
-          <ArrowLeft size={16} /> Voltar aos Candidatos
+          <ArrowLeft size={14} /> Voltar
         </button>
 
-        <div className="flex items-center justify-between" style={{ flexWrap: 'wrap', gap: '16px' }}>
-          <div className="flex items-center gap-4">
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--primary-600), var(--primary-400))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.3rem',
-                fontWeight: 800,
-                color: 'white',
-              }}
-            >
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{
+              width: 48,
+              height: 48,
+              borderRadius: '50%',
+              background: 'var(--primary-600)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.1rem',
+              fontWeight: 800,
+              color: 'white',
+              flexShrink: 0,
+            }}>
               {candidate.nome_completo.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.2 }}>
+              <h1 style={{ fontSize: '1.375rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '4px' }}>
                 {candidate.nome_completo}
               </h1>
-              <div className="flex items-center gap-3" style={{ marginTop: '4px' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                  CPF: {candidate.cpf}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                  {candidate.cpf}
                 </span>
                 <StatusBadge status={candidate.status as CandidateStatus} />
               </div>
@@ -197,88 +188,70 @@ export default function CandidateDetail() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              className="btn btn-success"
-              onClick={() => handleStatusChange('aprovado')}
-              disabled={saving}
-            >
-              <Check size={16} /> Aprovar Final
+            <button className="btn btn-success btn-sm" onClick={() => handleStatusChange('aprovado')} disabled={saving}>
+              <Check size={14} /> Aprovar
             </button>
-            <button
-              className="btn btn-danger"
-              onClick={() => handleStatusChange('sem_renda_comprovavel')}
-              disabled={saving}
-            >
-              <X size={16} /> Reprovar (Sem Renda)
+            <button className="btn btn-danger btn-sm" onClick={() => handleStatusChange('sem_renda_comprovavel')} disabled={saving}>
+              <X size={14} /> Reprovar
             </button>
-            <button
-              className="btn btn-outline"
-              onClick={() => handleStatusChange('aguardando_correcao')}
-              disabled={saving}
-            >
-              <AlertTriangle size={16} /> Pedir Correção
+            <button className="btn btn-outline btn-sm" onClick={() => handleStatusChange('aguardando_correcao')} disabled={saving}>
+              <AlertTriangle size={14} /> Pedir Correção
             </button>
           </div>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="stats-grid" style={{ marginBottom: '24px' }}>
+      <div className="stats-grid" style={{ marginBottom: '20px' }}>
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--primary-400)' }}><FileText size={24} /></div>
+          <div className="stat-icon" style={{ background: 'rgba(59, 130, 246, 0.08)', color: 'var(--info-500)' }}><FileText size={18} /></div>
           <div>
-            <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsUploaded}/{docsRequired}</div>
-            <div className="stat-label">Documentos Enviados</div>
+            <div className="stat-value" style={{ fontSize: '1.25rem' }}>{docsUploaded}/{docsRequired}</div>
+            <div className="stat-label">Enviados</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--success-500)' }}><CheckCircle size={24} /></div>
+          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.08)', color: 'var(--success-500)' }}><CheckCircle size={18} /></div>
           <div>
-            <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsApproved}</div>
-            <div className="stat-label">Doc. Aprovados</div>
+            <div className="stat-value" style={{ fontSize: '1.25rem' }}>{docsApproved}</div>
+            <div className="stat-label">Aprovados</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--danger-500)' }}><XCircle size={24} /></div>
+          <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.08)', color: 'var(--danger-500)' }}><XCircle size={18} /></div>
           <div>
-            <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsRejected}</div>
-            <div className="stat-label">Doc. Rejeitados</div>
+            <div className="stat-value" style={{ fontSize: '1.25rem' }}>{docsRejected}</div>
+            <div className="stat-label">Rejeitados</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--accent-500)' }}><FileWarning size={24} /></div>
+          <div className="stat-icon" style={{ background: 'rgba(245, 158, 11, 0.08)', color: 'var(--accent-500)' }}><FileWarning size={18} /></div>
           <div>
-            <div className="stat-value" style={{ fontSize: '1.4rem' }}>{docsMissing.length}</div>
-            <div className="stat-label">Doc. Faltantes</div>
+            <div className="stat-value" style={{ fontSize: '1.25rem' }}>{docsMissing.length}</div>
+            <div className="stat-label">Faltantes</div>
           </div>
         </div>
       </div>
 
-      {/* Global Alerts */}
+      {/* Alerts */}
       {candidate.fichas_cadastrais && (
-        <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {candidate.fichas_cadastrais.tem_imovel && (
             <div className="alert alert-warning">
-              <span className="alert-icon"><AlertTriangle size={20} /></span>
-              <div>
-                <strong>Atenção:</strong> Candidato declarou possuir imóvel em seu nome neste instante.
-              </div>
+              <span className="alert-icon"><AlertTriangle size={16} /></span>
+              <span><strong>Atenção:</strong> Candidato declarou possuir imóvel em seu nome.</span>
             </div>
           )}
           {candidate.fichas_cadastrais.financiamento_habitacional_pos_2005 && (
             <div className="alert alert-error">
-              <span className="alert-icon"><Ban size={20} /></span>
-              <div>
-                <strong>Subsídio Bloqueado:</strong> Candidato recebeu benefício habitacional após 16/05/2005. Processo pode continuar sem subsídio.
-              </div>
+              <span className="alert-icon"><Ban size={16} /></span>
+              <span><strong>Subsídio Bloqueado:</strong> Benefício habitacional pós 16/05/2005.</span>
             </div>
           )}
           {candidate.fichas_cadastrais.tipo_renda === 'Sem_renda' && (
             <div className="alert alert-error">
-              <span className="alert-icon"><Wallet size={20} /></span>
-              <div>
-                <strong>Sem Renda Comprovável:</strong> Candidato declarou não possuir renda alguma. (Avaliar reprovação)
-              </div>
+              <span className="alert-icon"><Wallet size={16} /></span>
+              <span><strong>Sem Renda:</strong> Candidato declarou não possuir renda.</span>
             </div>
           )}
         </div>
@@ -287,22 +260,22 @@ export default function CandidateDetail() {
       {/* Tabs */}
       <div className="tabs">
         <button className={`tab ${activeTab === 'dados' ? 'active' : ''}`} onClick={() => setActiveTab('dados')}>
-          <User size={16} /> Dados do Candidato
+          <User size={14} /> Dados
         </button>
         <button className={`tab ${activeTab === 'documentos' ? 'active' : ''}`} onClick={() => setActiveTab('documentos')}>
-          <FileText size={16} /> Documentos ({docsUploaded})
+          <FileText size={14} /> Documentos ({docsUploaded})
         </button>
         <button className={`tab ${activeTab === 'validacao' ? 'active' : ''}`} onClick={() => setActiveTab('validacao')}>
-          <Bot size={16} /> Validação IA
+          <Bot size={14} /> Validação IA
         </button>
       </div>
 
-      {/* Tab Content */}
+      {/* Tab: Dados */}
       {activeTab === 'dados' && (
         <div className="animate-slideUp">
-          {/* Personal Info */}
+          {/* Personal */}
           <div className="detail-section">
-            <h3 className="detail-section-title flex items-center gap-2"><User size={20} className="text-primary-400" /> Dados Pessoais</h3>
+            <h3 className="detail-section-title"><User size={16} /> Dados Pessoais</h3>
             <div className="detail-grid">
               <div className="detail-item">
                 <span className="detail-label">Nome Completo</span>
@@ -317,23 +290,23 @@ export default function CandidateDetail() {
                 <span className="detail-value">{candidate.telefone || '—'}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Endereço (MCMV)</span>
+                <span className="detail-label">Endereço</span>
                 <span className="detail-value">{candidate.endereco || '—'}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Município Projeto</span>
+                <span className="detail-label">Município</span>
                 <span className="detail-value">{candidate.municipio_projeto || '—'}</span>
               </div>
             </div>
           </div>
 
-          {/* Form Answers */}
+          {/* Ficha */}
           {candidate.fichas_cadastrais ? (
             <div className="detail-section">
-              <h3 className="detail-section-title flex items-center gap-2"><FileEdit size={20} className="text-primary-400" /> Respostas da Ficha Pré-Cadastral</h3>
+              <h3 className="detail-section-title"><FileEdit size={16} /> Ficha Pré-Cadastral</h3>
               <div className="detail-grid">
                 {Object.entries(candidate.fichas_cadastrais)
-                  .filter(([key]) => key !== 'candidato_id')
+                  .filter(([key]) => key !== 'candidato_id' && key !== 'created_at' && key !== 'updated_at')
                   .map(([key, value]) => (
                     <div className="detail-item" key={key}>
                       <span className="detail-label">{FORM_ANSWER_LABELS[key] || key}</span>
@@ -342,63 +315,74 @@ export default function CandidateDetail() {
                   ))}
               </div>
 
-              {/* Dependentes se houver */}
+              {/* Dependents */}
               {candidate.dependentes && candidate.dependentes.length > 0 && (
-                 <div style={{ marginTop: '16px' }}>
-                   <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Dependentes</div>
-                   <div className="detail-grid">
-                      {candidate.dependentes.map(dep => (
-                         <div key={dep.id} className="card" style={{ padding: '8px 12px' }}>
-                           <div><strong>{dep.nome}</strong> ({dep.idade} anos)</div>
-                           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Grau: {dep.grau_parentesco}</div>
-                           {dep.tem_renda && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Renda: R$ {dep.valor_renda}</div>}
-                         </div>
-                      ))}
-                   </div>
-                 </div>
+                <div style={{ marginTop: '20px' }}>
+                  <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Dependentes
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                    {candidate.dependentes.map(dep => (
+                      <div key={dep.id} style={{
+                        padding: '10px 14px',
+                        background: 'var(--bg-tertiary)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-default)',
+                      }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.8125rem' }}>{dep.nome}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {dep.idade} anos · {dep.grau_parentesco}
+                        </div>
+                        {dep.tem_renda && (
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Renda: R$ {dep.valor_renda}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* Narrative */}
-              <div style={{ marginTop: '24px' }}>
-                <h3 className="detail-section-title flex items-center gap-2"><BookOpen size={20} className="text-primary-400" /> Narrativa sobre Atividade e Renda</h3>
-                <div
-                  className="card"
-                  style={{
-                    background: 'rgba(59, 130, 246, 0.05)',
-                    borderColor: 'rgba(59, 130, 246, 0.15)',
-                  }}
-                >
-                  <p style={{ fontSize: '0.9rem', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                    {candidate.fichas_cadastrais.narrativa_renda || '(Nenhuma narrativa fornecida)'}
+              <div style={{ marginTop: '20px' }}>
+                <h3 className="detail-section-title"><BookOpen size={16} /> Narrativa de Renda</h3>
+                <div style={{
+                  padding: '14px 16px',
+                  background: 'var(--bg-tertiary)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-default)',
+                }}>
+                  <p style={{ fontSize: '0.875rem', lineHeight: 1.7, whiteSpace: 'pre-wrap', color: 'var(--text-secondary)' }}>
+                    {candidate.narrativa_renda || '(Nenhuma narrativa fornecida)'}
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="alert alert-warning" style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' }}>
+            <div className="alert alert-warning" style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-start' }}>
               <div className="flex items-center gap-2">
-                <span className="alert-icon"><FileWarning size={20} /></span>
-                <div>Ficha pré-cadastral ainda não foi preenchida por este candidato.</div>
+                <span className="alert-icon"><FileWarning size={16} /></span>
+                <span>Ficha pré-cadastral ainda não preenchida.</span>
               </div>
               <button 
                 className="btn btn-primary btn-sm"
                 onClick={() => navigate(`/onboarding?id=${candidate.id}&admin=true`)}
               >
-                Preencher Ficha Agora
+                Preencher Ficha
               </button>
             </div>
           )}
 
-          {/* Analyst observations */}
-          <div className="detail-section">
-            <h3 className="detail-section-title flex items-center gap-2"><FileEdit size={20} className="text-primary-400" /> Observações do Analista</h3>
+          {/* Observations */}
+          <div className="detail-section" style={{ marginTop: '20px' }}>
+            <h3 className="detail-section-title"><FileEdit size={16} /> Observações do Analista</h3>
             <div className="form-group">
               <textarea
                 className="form-textarea"
-                placeholder="Escreva suas observações sobre o candidato..."
+                placeholder="Anotações sobre o candidato..."
                 value={observations}
                 onChange={(e) => setObservations(e.target.value)}
-                rows={4}
+                rows={3}
+                style={{ minHeight: '80px' }}
               />
               <button
                 className="btn btn-primary btn-sm"
@@ -406,33 +390,32 @@ export default function CandidateDetail() {
                 onClick={handleSaveObservations}
                 disabled={saving}
               >
-                {saving ? 'Salvando...' : <><Check size={16} /> Salvar Observações</>}
+                {saving ? 'Salvando...' : <><Check size={14} /> Salvar</>}
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Tab: Documentos */}
       {activeTab === 'documentos' && (
         <div className="animate-slideUp">
-          {/* Missing documents alert */}
           {docsMissing.length > 0 && (
-            <div className="alert alert-warning" style={{ marginBottom: '20px' }}>
-              <span className="alert-icon"><FileWarning size={20} /></span>
-              <div>
-                <strong>Documentos faltantes ({docsMissing.length}):</strong>{' '}
+            <div className="alert alert-warning" style={{ marginBottom: '16px' }}>
+              <span className="alert-icon"><FileWarning size={16} /></span>
+              <span>
+                <strong>Faltantes ({docsMissing.length}):</strong>{' '}
                 {docsMissing.map((dt) => getDocumentName(dt)).join(', ')}
-              </div>
+              </span>
             </div>
           )}
 
-          {/* Document grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '12px' }}>
             {reqList.map((docType) => {
               const doc = documentos.find((d) => d.tipo_documento === docType);
               const statusColorMap: Record<string, string> = {
-                Pendente: 'var(--text-muted)',
-                Enviado: 'var(--primary-400)',
+                Pendente: 'var(--gray-400)',
+                Enviado: 'var(--info-500)',
                 Processando: 'var(--accent-500)',
                 Aprovado: 'var(--success-500)',
                 Rejeitado: 'var(--danger-500)',
@@ -443,77 +426,68 @@ export default function CandidateDetail() {
                   key={docType}
                   className="doc-card"
                   style={{
-                    borderLeftWidth: '3px',
-                    borderLeftColor: doc ? statusColorMap[doc.status_upload] : 'var(--border-default)',
+                    borderLeft: `3px solid ${doc ? statusColorMap[doc.status_upload] : 'var(--gray-200)'}`,
                   }}
                 >
                   <div className="doc-card-header">
                     <span className="doc-card-title">{getDocumentName(docType)}</span>
                     {doc ? (
-                      <span
-                        className="doc-card-status flex items-center gap-1"
-                        style={{ color: statusColorMap[doc.status_upload], fontWeight: 600 }}
-                      >
-                        {doc.status_upload === 'Aprovado' && <><CheckCircle size={14} /> Aprovado</>}
-                        {doc.status_upload === 'Rejeitado' && <><XCircle size={14} /> Rejeitado</>}
-                        {doc.status_upload === 'Enviado' && <><CheckCircle size={14} /> Enviado</>}
-                        {doc.status_upload === 'Pendente' && <><AlertTriangle size={14} /> Pendente</>}
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', fontWeight: 600, color: statusColorMap[doc.status_upload] }}>
+                        {doc.status_upload === 'Aprovado' && <><CheckCircle size={12} /> Aprovado</>}
+                        {doc.status_upload === 'Rejeitado' && <><XCircle size={12} /> Rejeitado</>}
+                        {doc.status_upload === 'Enviado' && <><CheckCircle size={12} /> Enviado</>}
+                        {doc.status_upload === 'Pendente' && <><AlertTriangle size={12} /> Pendente</>}
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        <XCircle size={12} /> Não enviado
+                      <span style={{ fontSize: '0.7rem', color: 'var(--gray-400)' }}>
+                        Não enviado
                       </span>
                     )}
                   </div>
 
                   {doc ? (
                     <div>
-                      <div className="flex items-center gap-2" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                        <Paperclip size={14} /> {doc.arquivo_original_nome || 'Arquivo'} 
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                        <Paperclip size={12} /> {doc.arquivo_original_nome || 'Arquivo'}
                       </div>
 
                       {doc.status_ia !== 'Pendente' && (
-                        <div style={{ marginBottom: '12px' }}>
-                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                            Confiança Lida (IA)
-                          </div>
+                        <div style={{ marginBottom: '10px' }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Confiança IA</div>
                           <ConfidenceMeter value={doc.confianca_leitura_ia || 0} />
-                          <div style={{ marginTop: '8px', fontSize: '0.75rem' }}>
-                            Status IA: {doc.status_ia}
+                          <div style={{ marginTop: '4px', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                            IA: {doc.status_ia}
                           </div>
                         </div>
                       )}
 
                       <div className="flex gap-2" style={{ marginTop: '8px' }}>
-                        <button
-                          className="btn btn-outline btn-sm"
-                          onClick={() => setSelectedDocUrl(doc.arquivo_url)}
-                        >
-                          <Eye size={14} /> Ver 
+                        <button className="btn btn-outline btn-sm" onClick={() => setSelectedDocUrl(doc.arquivo_url)}>
+                          <Eye size={12} /> Ver
                         </button>
                         <button
                           className="btn btn-success btn-sm"
                           onClick={() => handleDocAction(doc, 'Aprovado')}
                           disabled={doc.status_upload === 'Aprovado'}
                         >
-                          <Check size={14} /> 
+                          <Check size={12} />
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => setRejectingDocId(doc.id!)}
                           disabled={doc.status_upload === 'Rejeitado'}
                         >
-                          <X size={14} /> 
+                          <X size={12} />
                         </button>
                       </div>
                       {doc.motivo_rejeicao && doc.status_upload === 'Rejeitado' && (
-                        <div style={{ marginTop: '8px', fontSize: '0.78rem', color: 'var(--danger-500)' }}>
+                        <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--danger-500)' }}>
                           <strong>Motivo:</strong> {doc.motivo_rejeicao}
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                       Aguardando envio.
                     </div>
                   )}
@@ -524,70 +498,63 @@ export default function CandidateDetail() {
         </div>
       )}
 
+      {/* Tab: Validação IA */}
       {activeTab === 'validacao' && (
         <div className="animate-slideUp">
-          <div className="alert alert-info" style={{ marginBottom: '20px' }}>
-            <span className="alert-icon"><Bot size={20} /></span>
-            <div>
-              A validação por IA analisa automaticamente a qualidade, extrai dados via OCR e verifica prazos de validade.
-            </div>
+          <div className="alert alert-info" style={{ marginBottom: '16px' }}>
+            <span className="alert-icon"><Bot size={16} /></span>
+            <span>A validação por IA analisa qualidade, extrai dados via OCR e verifica prazos.</span>
           </div>
 
           {documentos.filter((d) => d.status_ia && d.status_ia !== 'Pendente').length === 0 ? (
             <div className="empty-state">
-              <div style={{ color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-                <Bot size={48} strokeWidth={1} />
-              </div>
-              <div className="empty-state-title">Nenhuma validação de IA concluída</div>
+              <Bot size={40} strokeWidth={1.5} style={{ color: 'var(--gray-400)', marginBottom: '12px' }} />
+              <div className="empty-state-title">Nenhuma validação concluída</div>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {documentos
                 .filter((d) => d.status_ia !== 'Pendente')
                 .map((doc) => (
-                  <div key={doc.id} className="card">
-                    <div className="flex items-center justify-between" style={{ marginBottom: '16px' }}>
-                      <div>
-                        <h4 style={{ fontWeight: 600, fontSize: '0.95rem' }}>
-                          {getDocumentName(doc.tipo_documento as DocumentType)}
-                        </h4>
-                      </div>
-                      <div
-                        className="flex items-center gap-1"
-                        style={{
-                          padding: '4px 12px',
-                          borderRadius: '999px',
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                          background: doc.status_ia === 'Aprovado'
-                            ? 'rgba(16, 185, 129, 0.12)'
-                            : 'rgba(239, 68, 68, 0.12)',
-                          color: doc.status_ia === 'Aprovado' ? 'var(--success-500)' : 'var(--danger-500)',
-                        }}
-                      >
-                        {doc.status_ia === 'Aprovado' ? <><CheckCircle size={14} /> IA Válido</> : <><XCircle size={14} /> IA Rejeitado</>}
-                      </div>
+                  <div key={doc.id} className="card" style={{ padding: 'var(--space-4)' }}>
+                    <div className="flex items-center justify-between" style={{ marginBottom: '12px' }}>
+                      <h4 style={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                        {getDocumentName(doc.tipo_documento as DocumentType)}
+                      </h4>
+                      <span style={{
+                        padding: '3px 10px',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        background: doc.status_ia === 'Aprovado' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                        color: doc.status_ia === 'Aprovado' ? '#047857' : '#991b1b',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}>
+                        {doc.status_ia === 'Aprovado' ? <><CheckCircle size={12} /> Válido</> : <><XCircle size={12} /> Rejeitado</>}
+                      </span>
                     </div>
 
-                    <div className="detail-grid" style={{ marginBottom: '16px' }}>
+                    <div className="detail-grid" style={{ marginBottom: '12px' }}>
                       <div className="detail-item">
-                        <span className="detail-label">Confiança Leitura</span>
+                        <span className="detail-label">Confiança</span>
                         <ConfidenceMeter value={doc.confianca_leitura_ia || 0} />
                       </div>
                       <div className="detail-item">
-                        <span className="detail-label">Data Emissão Capturada</span>
+                        <span className="detail-label">Data Emissão</span>
                         <span className="detail-value">{doc.data_emissao_documento || 'ND'}</span>
                       </div>
                     </div>
 
                     {doc.alertas_ia && (
-                      <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {doc.alertas_ia.issues && doc.alertas_ia.issues.length > 0 && (
                           <div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--danger-500)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <AlertTriangle size={14} /> Problemas Identificados:
+                            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--danger-500)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <AlertTriangle size={12} /> Problemas:
                             </div>
-                            <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                            <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                               {doc.alertas_ia.issues.map((issue: string, idx: number) => (
                                 <li key={idx}>{issue}</li>
                               ))}
@@ -596,18 +563,18 @@ export default function CandidateDetail() {
                         )}
 
                         {doc.alertas_ia.expiryCheck && (
-                          <div style={{ 
-                            padding: '8px 12px', 
-                            borderRadius: '8px', 
-                            background: doc.alertas_ia.expiryCheck.isExpired ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)',
-                            border: `1px solid ${doc.alertas_ia.expiryCheck.isExpired ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`,
-                            fontSize: '0.82rem',
+                          <div style={{
+                            padding: '8px 10px',
+                            borderRadius: 'var(--radius-md)',
+                            background: doc.alertas_ia.expiryCheck.isExpired ? '#fef2f2' : '#f0fdf4',
+                            border: `1px solid ${doc.alertas_ia.expiryCheck.isExpired ? '#fecaca' : '#dcfce7'}`,
+                            fontSize: '0.75rem',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '8px',
-                            color: doc.alertas_ia.expiryCheck.isExpired ? 'var(--danger-500)' : 'var(--success-500)'
+                            gap: '6px',
+                            color: doc.alertas_ia.expiryCheck.isExpired ? '#991b1b' : '#166534'
                           }}>
-                            {doc.alertas_ia.expiryCheck.isExpired ? <Ban size={16} /> : <CheckCircle size={16} />}
+                            {doc.alertas_ia.expiryCheck.isExpired ? <Ban size={14} /> : <CheckCircle size={14} />}
                             {doc.alertas_ia.expiryCheck.message}
                           </div>
                         )}
@@ -620,33 +587,26 @@ export default function CandidateDetail() {
         </div>
       )}
 
-      {/* Viewer Modal */}
+      {/* Document Viewer Modal */}
       {selectedDocUrl && (
         <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.85)',
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
           zIndex: 9999,
           display: 'flex',
           flexDirection: 'column'
         }}>
-          <div style={{ padding: '16px', display: 'flex', justifyContent: 'flex-end', gap: '8px', background: 'var(--bg-primary)' }}>
-            <a
-              href={selectedDocUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              download
-              className="btn btn-outline"
-            >
-              <Download size={16} /> Exportar PDF
+          <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'flex-end', gap: '8px', background: 'var(--gray-900)' }}>
+            <a href={selectedDocUrl} target="_blank" rel="noopener noreferrer" download className="btn btn-outline btn-sm" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.2)' }}>
+              <Download size={14} /> Exportar
             </a>
-            <button className="btn btn-primary" onClick={() => setSelectedDocUrl(null)}>Fechar Visualizador ✕</button>
+            <button className="btn btn-primary btn-sm" onClick={() => setSelectedDocUrl(null)}>Fechar ✕</button>
           </div>
-          <div style={{ flex: 1, padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+          <div style={{ flex: 1, padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <iframe 
-               src={selectedDocUrl} 
-               style={{ width: '100%', maxWidth: '1000px', height: '100%', backgroundColor: 'white', border: 'none', borderRadius: '8px' }}
-               title="Document Viewer"
+              src={selectedDocUrl} 
+              style={{ width: '100%', maxWidth: '900px', height: '100%', backgroundColor: 'white', border: 'none', borderRadius: 'var(--radius-md)' }}
+              title="Document Viewer"
             />
           </div>
         </div>
@@ -655,40 +615,32 @@ export default function CandidateDetail() {
       {/* Rejection Modal */}
       {rejectingDocId && (
         <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(2px)',
           zIndex: 9999,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          <div className="card-glass" style={{ width: '100%', maxWidth: '400px', padding: '24px' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '16px' }}>Rejeitar Documento</h3>
+          <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '24px' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '16px' }}>Rejeitar Documento</h3>
             <div className="form-group">
-              <label className="form-label">Por que o documento está sendo rejeitado?</label>
+              <label className="form-label">Motivo da rejeição</label>
               <textarea 
                 className="form-textarea" 
                 rows={3}
-                placeholder="Exemplo: Documento ilegível, data de emissão expirou..."
+                placeholder="Ex: Documento ilegível, data expirada..."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
+                style={{ minHeight: '80px' }}
               />
             </div>
-            <div className="flex justify-between" style={{ marginTop: '24px' }}>
-              <button 
-                className="btn btn-ghost" 
-                onClick={() => {
-                  setRejectingDocId(null);
-                  setRejectReason('');
-                }}>
+            <div className="flex justify-between" style={{ marginTop: '16px' }}>
+              <button className="btn btn-ghost btn-sm" onClick={() => { setRejectingDocId(null); setRejectReason(''); }}>
                 Cancelar
               </button>
-              <button 
-                className="btn btn-danger" 
-                onClick={submitRejection}
-                disabled={!rejectReason.trim()}
-              >
+              <button className="btn btn-danger btn-sm" onClick={submitRejection} disabled={!rejectReason.trim()}>
                 Confirmar Rejeição
               </button>
             </div>
