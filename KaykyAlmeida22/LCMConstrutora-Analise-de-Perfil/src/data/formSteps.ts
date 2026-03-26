@@ -36,9 +36,7 @@ export const formSteps: FormStep[] = [
         type: 'select',
         required: true,
         options: [
-          { value: 'Extrema', label: 'Extrema (MG)' },
-          { value: 'Mariana', label: 'Mariana (MG)' },
-          { value: 'Outros', label: 'Outros' }
+          { value: 'Extrema', label: 'Extrema (MG)' }
         ]
       }
     ]

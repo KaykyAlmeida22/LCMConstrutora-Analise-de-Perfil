@@ -132,8 +132,6 @@ export default function NewCandidate() {
             required
           >
             <option value="Extrema">Extrema - MG</option>
-            <option value="Mariana">Mariana - MG</option>
-            <option value="Outros">Outros</option>
           </select>
         </div>
 
