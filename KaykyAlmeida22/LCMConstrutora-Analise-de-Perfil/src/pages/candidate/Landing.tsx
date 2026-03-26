@@ -102,8 +102,8 @@ export default function Landing() {
 
         {/* Background image */}
         <img
-          src="https://images.unsplash.com/photo-1582408921715-18e7806365c1?w=1200&q=80"
-          alt="Construção"
+          src="/housing_background.png"
+          alt="Minha Casa Minha Vida"
           style={{
             width: '100%',
             height: '100%',
@@ -162,21 +162,13 @@ export default function Landing() {
               lineHeight: 1.7,
               maxWidth: '360px',
             }}>
-              Inicie seu cadastro ou consulte o status da sua inscrição no programa habitacional da LCM Construtora.
+              Inicie seu cadastro ou consulte o status da sua inscrição no programa Minha Casa Minha Vida da LCM Construtora.
             </p>
           </div>
 
-          {/* Footer stats */}
-          <div style={{ display: 'flex', gap: '32px' }}>
-            <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ShieldCheck size={16} /> 100% Protegido
-            </div>
-            <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ShieldCheck size={16} /> Validação por IA
-            </div>
-          </div>
         </div>
       </div>
+
 
       {/* Right Side — Login Form */}
       <div style={{

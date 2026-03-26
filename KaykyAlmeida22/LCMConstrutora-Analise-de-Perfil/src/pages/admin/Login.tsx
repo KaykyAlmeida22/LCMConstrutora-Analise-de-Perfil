@@ -67,8 +67,8 @@ export default function Login() {
 
         {/* Background image */}
         <img
-          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80"
-          alt="Construção"
+          src="/admin_background.png"
+          alt="Administrativo LCM"
           style={{
             width: '100%',
             height: '100%',
