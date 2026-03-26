@@ -331,7 +331,7 @@ export default function CandidateDetail() {
                       }}>
                         <div style={{ fontWeight: 600, fontSize: '0.8125rem' }}>{dep.nome}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {dep.idade} anos · {dep.grau_parentesco}
+                          {dep.idade} anos · {dep.grau_parentesco === 'Outro' ? dep.outro_parentesco : dep.grau_parentesco}
                         </div>
                         {dep.tem_renda && (
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Renda: R$ {dep.valor_renda}</div>

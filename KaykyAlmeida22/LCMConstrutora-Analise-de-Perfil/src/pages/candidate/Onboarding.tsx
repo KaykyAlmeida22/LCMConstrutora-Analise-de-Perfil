@@ -118,7 +118,13 @@ export default function Onboarding() {
       if (q.type === 'dependentes_array') {
         const deps = ((answers as any)[q.id] as Dependent[]) || [];
         if (deps.length === 0) return false;
-        return deps.every(d => d.nome.trim() !== '' && d.idade >= 0 && d.grau_parentesco !== '' && (!d.tem_renda || (d.tem_renda && d.valor_renda !== undefined && d.valor_renda > 0)));
+        return deps.every(d => 
+          d.nome.trim() !== '' && 
+          d.idade >= 0 && 
+          d.grau_parentesco !== '' && 
+          (d.grau_parentesco !== 'Outro' || (d.outro_parentesco && d.outro_parentesco.trim() !== '')) &&
+          (!d.tem_renda || (d.tem_renda && d.valor_renda !== undefined && d.valor_renda > 0))
+        );
       }
       const val = (answers as any)[q.id];
       if (val === null || val === undefined || val === '') return false;
@@ -456,7 +462,9 @@ export default function Onboarding() {
                         {((answers.dependentes as Dependent[]) || []).map((dep, index) => (
                           <div key={index} style={{ padding: '20px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: 'var(--shadow-sm)' }}>
                             <div className="flex justify-between items-center">
-                              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary-600)', textTransform: 'uppercase' }}>Dep. #{index + 1}</span>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary-600)', textTransform: 'uppercase' }}>
+                                {['Primeiro', 'Segundo', 'Terceiro', 'Quarto', 'Quinto', 'Sexto', 'Sétimo', 'Oitavo', 'Nono', 'Décimo'][index] || `${index + 1}º`} Dependente
+                              </span>
                               <button 
                                 type="button" 
                                 className="btn btn-ghost btn-sm" 
@@ -520,6 +528,23 @@ export default function Onboarding() {
                                 </select>
                               </div>
                             </div>
+
+                            {dep.grau_parentesco === 'Outro' && (
+                              <div className="form-group animate-fadeIn" style={{ marginTop: '0' }}>
+                                <label className="form-label" style={{ fontSize: '0.75rem' }}>Especifique o Parentesco *</label>
+                                <input
+                                  className="form-input"
+                                  placeholder="Ex: Tio, Avó, Amigo..."
+                                  value={dep.outro_parentesco || ''}
+                                  onChange={(e) => {
+                                    const newList = [...((answers.dependentes as Dependent[]) || [])];
+                                    newList[index].outro_parentesco = e.target.value;
+                                    handleAnswer('dependentes', newList);
+                                  }}
+                                  style={{ height: '40px' }}
+                                />
+                              </div>
+                            )}
 
                             <div className="form-group">
                               <label className="form-label" style={{ fontSize: '0.75rem' }}>Possui renda?</label>

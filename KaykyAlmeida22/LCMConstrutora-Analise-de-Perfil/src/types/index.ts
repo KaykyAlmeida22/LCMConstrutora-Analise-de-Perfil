@@ -7,6 +7,7 @@ export interface Dependent {
   nome: string;
   idade: number;
   grau_parentesco: string;
+  outro_parentesco?: string;
   tem_renda: boolean;
   valor_renda?: number;
 }
