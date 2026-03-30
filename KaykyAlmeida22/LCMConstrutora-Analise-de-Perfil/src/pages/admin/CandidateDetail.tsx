@@ -597,7 +597,18 @@ export default function CandidateDetail() {
           flexDirection: 'column'
         }}>
           <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'flex-end', gap: '8px', background: 'var(--gray-900)' }}>
-            <a href={selectedDocUrl} target="_blank" rel="noopener noreferrer" download className="btn btn-outline btn-sm" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.2)' }}>
+            <a 
+              href={selectedDocUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              download 
+              className="btn btn-sm" 
+              style={{ 
+                color: '#fff', 
+                background: 'rgba(255,255,255,0.1)', 
+                border: '1px solid rgba(255,255,255,0.2)' 
+              }}
+            >
               <Download size={14} /> Exportar
             </a>
             <button className="btn btn-primary btn-sm" onClick={() => setSelectedDocUrl(null)}>Fechar ✕</button>
